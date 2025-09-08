@@ -4,6 +4,7 @@ import { Bindings, ChatRequest, ChatResponse } from '../types';
 import { OpenAIClient } from '../services/openai';
 import { DatabaseService } from '../services/database';
 import { SubscriptionService } from '../services/subscription';
+import { MemoryPlusService } from '../services/memory-plus';
 import { Logger } from '../utils/logger';
 
 const chat = new Hono<{ Bindings: Bindings }>();
@@ -44,19 +45,33 @@ chat.post('/', async (c) => {
     const subService = new SubscriptionService(c.env, userId);
     const openai = new OpenAIClient(c.env, sessionId);
     const db = new DatabaseService(c.env, sessionId);
+    const memoryService = new MemoryPlusService(c.env, sessionId);
 
-    // Check subscription status
-    const subscriptionStatus = await subService.getSubscriptionStatus(userId);
-    
-    if (!subscriptionStatus.canChat) {
-      logger.warn('User cannot chat - subscription limit reached', { userId });
-      return c.json({
-        error: 'Bạn đã hết lượt tin nhắn miễn phí',
-        needsPayment: true,
-        showPaywall: true,
-        messagesLeft: 0,
-        subscriptionStatus
-      }, 403);
+    // Check subscription status (bypass for demo)
+    let subscriptionStatus;
+    try {
+      subscriptionStatus = await subService.getSubscriptionStatus(userId);
+      
+      if (!subscriptionStatus.canChat) {
+        logger.warn('User cannot chat - subscription limit reached', { userId });
+        return c.json({
+          error: 'Bạn đã hết lượt tin nhắn miễn phí',
+          needsPayment: true,
+          showPaywall: true,
+          messagesLeft: 0,
+          subscriptionStatus
+        }, 403);
+      }
+    } catch (error) {
+      // Fallback: Allow chat if subscription service fails
+      logger.warn('Subscription service failed, allowing chat', error);
+      subscriptionStatus = {
+        canChat: true,
+        messagesLeft: 10,
+        subscriptionType: 'free',
+        needsPayment: false,
+        showPaywall: false
+      };
     }
 
     logger.info('Processing chat request', { 
@@ -66,42 +81,113 @@ chat.post('/', async (c) => {
       messagesLeft: subscriptionStatus.messagesLeft
     });
 
-    // Get or create session
-    let session = await db.getSession(sessionId);
-    if (!session) {
-      session = await db.createSession(userId, body.persona || 'caring_girlfriend');
+    // Get or create session (with error handling)
+    let session;
+    try {
+      session = await db.getSession(sessionId);
+      if (!session) {
+        session = await db.createSession(userId, body.persona || 'caring_girlfriend');
+        sessionId = session.id;
+      }
+    } catch (error) {
+      logger.warn('Database session error, using fallback', error);
+      // Fallback session
+      session = {
+        id: sessionId || `session_${Date.now()}`,
+        user_id: userId,
+        persona: body.persona || 'caring_girlfriend',
+        created_at: new Date().toISOString(),
+        last_active: new Date().toISOString()
+      };
       sessionId = session.id;
     }
 
-    // Increment message count for free users
-    if (subscriptionStatus.subscriptionType === 'free') {
-      await subService.incrementMessageCount(userId);
+    // Increment message count for free users (with error handling)
+    try {
+      if (subscriptionStatus.subscriptionType === 'free') {
+        await subService.incrementMessageCount(userId);
+      }
+    } catch (error) {
+      logger.warn('Failed to increment message count', error);
     }
 
-    // Save user message
-    await db.saveMessage(sessionId, body.text, 'user');
+    // Save user message (with error handling)
+    try {
+      await db.saveMessage(sessionId, body.text, 'user');
+    } catch (error) {
+      logger.warn('Failed to save user message', error);
+    }
 
-    // Generate AI response
-    const chatResponse = await openai.generateResponse({
-      text: body.text,
-      sessionId: sessionId,
-      persona: session.persona
-    });
+    // Check OpenAI API key
+    if (!c.env.OPENAI_API_KEY) {
+      logger.error('OpenAI API key not configured');
+      throw new Error('OpenAI API key missing');
+    }
 
-    // Save assistant message
-    await db.saveMessage(sessionId, chatResponse.reply, 'assistant');
+    // Generate AI response with memory enhancement
+    let chatResponse;
+    try {
+      // Process conversation for memories (extract important info from user message)
+      await memoryService.processConversationForMemories(userId, body.text, '');
+      
+      // Update relationship stage
+      const relationshipStage = await memoryService.updateRelationshipStage(sessionId, userId);
+      
+      // Generate memory-enhanced response
+      chatResponse = await openai.generateResponseWithMemory({
+        text: body.text,
+        sessionId: sessionId,
+        persona: session.persona,
+        userId: userId,
+        memoryService: memoryService
+      });
+      
+      // After AI response, store any new memories from the conversation
+      await memoryService.processConversationForMemories(userId, body.text, chatResponse.reply);
+      
+      logger.info('Memory Plus enhanced response', {
+        relationshipStage,
+        memoriesUsed: true
+      });
+      
+    } catch (memoryError) {
+      logger.warn('Memory Plus service failed, falling back to basic response', memoryError);
+      
+      // Fallback to basic response if Memory Plus fails
+      chatResponse = await openai.generateResponse({
+        text: body.text,
+        sessionId: sessionId,
+        persona: session.persona
+      });
+    }
 
-    // Log analytics
-    await db.logEvent(sessionId, 'chat_message', {
-      userId,
-      userMessageLength: body.text.length,
-      assistantMessageLength: chatResponse.reply.length,
-      persona: session.persona,
-      subscriptionType: subscriptionStatus.subscriptionType
-    });
+    // Save assistant message (with error handling)
+    try {
+      await db.saveMessage(sessionId, chatResponse.reply, 'assistant');
+    } catch (error) {
+      logger.warn('Failed to save assistant message', error);
+    }
 
-    // Get updated subscription status
-    const newStatus = await subService.getSubscriptionStatus(userId);
+    // Log analytics (with error handling)
+    try {
+      await db.logEvent(sessionId, 'chat_message', {
+        userId,
+        userMessageLength: body.text.length,
+        assistantMessageLength: chatResponse.reply.length,
+        persona: session.persona,
+        subscriptionType: subscriptionStatus.subscriptionType
+      });
+    } catch (error) {
+      logger.warn('Failed to log analytics', error);
+    }
+
+    // Get updated subscription status (with error handling)
+    let newStatus = subscriptionStatus;
+    try {
+      newStatus = await subService.getSubscriptionStatus(userId);
+    } catch (error) {
+      logger.warn('Failed to get updated subscription status', error);
+    }
 
     const response = {
       reply: chatResponse.reply,
@@ -119,7 +205,11 @@ chat.post('/', async (c) => {
 
   } catch (error) {
     const logger = new Logger(sessionId);
-    logger.error('Chat endpoint error', error);
+    logger.error('Chat endpoint error', {
+      error: error.message,
+      stack: error.stack,
+      userId
+    });
     
     // Return user-friendly error message
     return c.json({ 

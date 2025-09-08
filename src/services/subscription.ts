@@ -12,6 +12,11 @@ export class SubscriptionService {
     this.logger = new Logger(sessionId);
     this.freeMessagesLimit = parseInt(bindings.FREE_MESSAGES_LIMIT) || 10;
     this.referralBonusDays = parseInt(bindings.REFERRAL_BONUS_DAYS) || 1;
+    
+    // Check if DB is available
+    if (!this.db) {
+      this.logger.warn('D1 Database not available, running in mock mode');
+    }
   }
 
   // Generate unique referral code
@@ -27,6 +32,20 @@ export class SubscriptionService {
   // Create or get user
   async getOrCreateUser(userId: string, referralCode?: string): Promise<User> {
     try {
+      // Mock mode fallback if no database
+      if (!this.db) {
+        return {
+          id: userId,
+          referral_code: `GF${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          referred_by: referralCode || null,
+          subscription_type: 'free',
+          subscription_expires_at: null,
+          messages_used: 0,
+          created_at: new Date().toISOString(),
+          last_active: new Date().toISOString()
+        };
+      }
+
       // Try to get existing user
       let user = await this.db.prepare(`
         SELECT * FROM users WHERE id = ?
@@ -95,6 +114,22 @@ export class SubscriptionService {
   // Check subscription status
   async getSubscriptionStatus(userId: string): Promise<SubscriptionStatus> {
     try {
+      // Mock mode fallback if no database
+      if (!this.db) {
+        // Simple in-memory tracking for demo
+        const messagesUsed = parseInt(localStorage?.getItem(`messages_${userId}`) || '0');
+        const messagesLeft = Math.max(0, this.freeMessagesLimit - messagesUsed);
+        
+        return {
+          canChat: messagesLeft > 0,
+          messagesLeft,
+          subscriptionType: 'free',
+          expiresAt: null,
+          needsPayment: messagesLeft === 0,
+          showPaywall: messagesUsed >= this.freeMessagesLimit
+        };
+      }
+
       const user = await this.db.prepare(`
         SELECT * FROM users WHERE id = ?
       `).bind(userId).first() as User;
