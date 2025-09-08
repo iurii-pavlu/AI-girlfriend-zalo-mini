@@ -13,8 +13,8 @@ export class GoogleCloudClient {
     this.apiKey = bindings.GOOGLE_API_KEY;
     this.projectId = bindings.GOOGLE_PROJECT_ID || 'ai-girlfriend-zalo';
     this.logger = new Logger(sessionId);
-    this.sttLanguage = bindings.GOOGLE_STT_LANGUAGE || 'en-US';
-    this.ttsVoice = bindings.GOOGLE_TTS_VOICE || 'en-US-Neural2-F';
+    this.sttLanguage = bindings.GOOGLE_STT_LANGUAGE || 'vi-VN';
+    this.ttsVoice = bindings.GOOGLE_TTS_VOICE || 'vi-VN-Neural2-A';
     this.ttsSpeakingRate = parseFloat(bindings.GOOGLE_TTS_SPEAKING_RATE) || 1.0;
   }
 
@@ -101,7 +101,7 @@ export class GoogleCloudClient {
           text: request.text
         },
         voice: {
-          languageCode: voiceId.split('-').slice(0, 2).join('-'), // e.g., "en-US"
+          languageCode: voiceId.split('-').slice(0, 2).join('-'), // e.g., "vi-VN"
           name: voiceId,
           ssmlGender: 'FEMALE' // Default to female voice for girlfriend persona
         },

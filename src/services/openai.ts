@@ -21,7 +21,7 @@ export class OpenAIClient {
       const filterResult = await this.contentFilter.filterContent(request.text);
       if (!filterResult.isAllowed) {
         return {
-          reply: "I'd prefer to keep our conversation positive and appropriate. How about we talk about something else? ❤️",
+          reply: "Em muốn chúng ta nói chuyện tích cực và phù hợp hơn. Chúng ta nói về chủ đề khác nhé anh? ❤️",
           sessionId: request.sessionId || this.generateSessionId()
         };
       }
@@ -68,11 +68,11 @@ export class OpenAIClient {
       }
 
       const data = await response.json() as any;
-      const reply = data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response right now. Please try again! 💕";
+      const reply = data.choices?.[0]?.message?.content || "Em xin lỗi, em không thể tạo phản hồi ngay bây giờ. Anh thử lại nhé! 💕";
 
       // Filter output content as well
       const outputFilter = await this.contentFilter.filterContent(reply);
-      const finalReply = outputFilter.isAllowed ? reply : "Let me think of a better way to respond to that! ❤️";
+      const finalReply = outputFilter.isAllowed ? reply : "Để em suy nghĩ cách trả lời hay hơn nhé! ❤️";
 
       this.logger.info('OpenAI response generated', { 
         inputLength: request.text.length,
@@ -88,7 +88,7 @@ export class OpenAIClient {
     } catch (error) {
       this.logger.error('Error generating OpenAI response', error);
       return {
-        reply: "I'm having some technical difficulties right now. Please try again in a moment! 🥰",
+        reply: "Em đang gặp một chút khó khăn kỹ thuật. Anh thử lại sau một chút nhé! 🥰",
         sessionId: request.sessionId || this.generateSessionId()
       };
     }

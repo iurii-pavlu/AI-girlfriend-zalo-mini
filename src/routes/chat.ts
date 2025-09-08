@@ -91,8 +91,8 @@ chat.post('/', async (c) => {
     
     // Return user-friendly error message
     return c.json({ 
-      error: 'I\'m having trouble responding right now. Please try again! 💕',
-      reply: 'Sorry, I encountered an issue. Please try sending your message again! ❤️',
+      error: 'Em đang gặp khó khăn trong việc phản hồi. Anh thử lại nhé! 💕',
+      reply: 'Xin lỗi anh, em gặp sự cố. Anh gửi lại tin nhắn được không! ❤️',
       sessionId: sessionId
     }, 500);
   }

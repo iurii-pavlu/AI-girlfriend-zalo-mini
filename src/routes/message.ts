@@ -146,8 +146,8 @@ message.post('/', async (c) => {
     
     // Return user-friendly error response
     return c.json({ 
-      error: 'I\'m having trouble right now. Please try again! 💕',
-      text: 'Sorry, I encountered an issue. Please try again! ❤️',
+      error: 'Em đang gặp khó khăn. Anh thử lại nhé! 💕',
+      text: 'Xin lỗi anh, em gặp sự cố. Anh thử lại được không! ❤️',
       audioUrl: '',
       sessionId: sessionId
     }, 500);

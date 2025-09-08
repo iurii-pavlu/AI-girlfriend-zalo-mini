@@ -114,7 +114,7 @@ export class DatabaseService {
     try {
       await this.db.prepare(`
         INSERT OR REPLACE INTO voice_settings (session_id, voice_id, speaking_rate, language)
-        VALUES (?, 'en-US-Neural2-F', 1.0, 'en-US')
+        VALUES (?, 'vi-VN-Neural2-A', 1.0, 'vi-VN')
       `).bind(sessionId).run();
     } catch (error) {
       this.logger.error('Error creating voice settings', error);

@@ -78,8 +78,8 @@ app.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AI Girlfriend - Zalo Mini App</title>
-        <meta name="description" content="Your caring AI girlfriend companion with voice chat">
+        <title>Bạn Gái AI - Zalo Mini App</title>
+        <meta name="description" content="Người bạn gái AI dịu dàng, quan tâm với tính năng chat giọng nói">
         
         <!-- Zalo Mini App optimizations -->
         <meta name="format-detection" content="telephone=no">
@@ -157,8 +157,8 @@ app.get('/', (c) => {
             <div id="loading" class="flex items-center justify-center h-screen bg-gradient-to-br from-girlfriend-400 to-girlfriend-600">
                 <div class="text-center text-white">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                    <h2 class="text-xl font-semibold">AI Girlfriend</h2>
-                    <p class="text-girlfriend-100 mt-2">Connecting to your companion...</p>
+                    <h2 class="text-xl font-semibold">Bạn Gái AI</h2>
+                    <p class="text-girlfriend-100 mt-2">Đang kết nối với bạn gái của anh...</p>
                 </div>
             </div>
             
@@ -172,8 +172,8 @@ app.get('/', (c) => {
                                 <i class="fas fa-heart text-lg"></i>
                             </div>
                             <div>
-                                <h1 class="font-semibold text-lg">Your AI Girlfriend</h1>
-                                <p class="text-girlfriend-100 text-sm" id="status">Online • Caring Mode</p>
+                                <h1 class="font-semibold text-lg">Bạn Gái AI Của Anh</h1>
+                                <p class="text-girlfriend-100 text-sm" id="status">Trực Tuyến • Chế Độ Quan Tâm</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -204,7 +204,7 @@ app.get('/', (c) => {
                             <input 
                                 id="message-input" 
                                 type="text" 
-                                placeholder="Type your message..." 
+                                placeholder="Nhập tin nhắn của anh..." 
                                 class="flex-1 bg-transparent outline-none text-gray-700"
                                 maxlength="1000"
                             >
@@ -218,7 +218,7 @@ app.get('/', (c) => {
                     <div id="voice-recording" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <div class="flex items-center justify-center space-x-3">
                             <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                            <span class="text-red-700 font-medium">Recording...</span>
+                            <span class="text-red-700 font-medium">Đang thu âm...</span>
                             <span class="text-red-600 text-sm" id="recording-time">0:00</span>
                         </div>
                     </div>
@@ -228,20 +228,20 @@ app.get('/', (c) => {
             <!-- Settings Modal -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-lg p-6 w-full max-w-sm">
-                    <h3 class="text-lg font-semibold mb-4">Voice Settings</h3>
+                    <h3 class="text-lg font-semibold mb-4">Cài Đặt Giọng Nói</h3>
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Voice Style</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phong Cách Giọng Nói</label>
                             <select id="voice-select" class="w-full p-2 border border-gray-300 rounded-md">
-                                <option value="en-US-Neural2-F">Caring (Female)</option>
-                                <option value="en-US-Neural2-H">Gentle (Female)</option>
-                                <option value="en-US-Neural2-G">Sweet (Female)</option>
+                                <option value="vi-VN-Neural2-A">Quan Tâm (Nữ)</option>
+                                <option value="vi-VN-Neural2-D">Dịu Dàng (Nữ)</option>
+                                <option value="vi-VN-Standard-A">Ngọt Ngào (Nữ)</option>
                             </select>
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Speaking Rate</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tốc Độ Nói</label>
                             <input id="speaking-rate" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full">
                             <div class="text-sm text-gray-500 text-center mt-1">
                                 <span id="rate-display">1.0x</span>
@@ -249,18 +249,18 @@ app.get('/', (c) => {
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Personality</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tính Cách</label>
                             <select id="persona-select" class="w-full p-2 border border-gray-300 rounded-md">
-                                <option value="caring_girlfriend">Caring & Supportive</option>
-                                <option value="playful_girlfriend">Playful & Energetic</option>
-                                <option value="shy_girlfriend">Shy & Gentle</option>
+                                <option value="caring_girlfriend">Quan Tâm & Hỗ Trợ</option>
+                                <option value="playful_girlfriend">Vui Tươi & Năng Động</option>
+                                <option value="shy_girlfriend">Nhút Nhát & Dịu Dàng</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="flex justify-end space-x-3 mt-6">
-                        <button id="cancel-settings" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                        <button id="save-settings" class="px-4 py-2 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">Save</button>
+                        <button id="cancel-settings" class="px-4 py-2 text-gray-600 hover:text-gray-800">Hủy</button>
+                        <button id="save-settings" class="px-4 py-2 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">Lưu</button>
                     </div>
                 </div>
             </div>
@@ -270,22 +270,22 @@ app.get('/', (c) => {
                 <div class="bg-white rounded-lg p-6 w-full max-w-md text-center">
                     <div class="mb-4">
                         <i class="fas fa-video text-6xl text-girlfriend-400 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-800">Video Call Feature</h3>
-                        <p class="text-gray-600 mt-2">Coming Soon! 🎬✨</p>
+                        <h3 class="text-xl font-semibold text-gray-800">Tính Năng Video Call</h3>
+                        <p class="text-gray-600 mt-2">Sắp Ra Mắt! 🎬✨</p>
                     </div>
                     
                     <div class="bg-gray-50 rounded-lg p-4 mb-4 text-left">
-                        <h4 class="font-medium text-gray-800 mb-2">Planned Features:</h4>
+                        <h4 class="font-medium text-gray-800 mb-2">Tính Năng Sắp Có:</h4>
                         <ul class="text-sm text-gray-600 space-y-1">
-                            <li>• Real-time video calling with AI avatar</li>
-                            <li>• Lip-sync animation with your voice</li>
-                            <li>• Emotion-based facial expressions</li>
-                            <li>• Custom avatar appearance</li>
+                            <li>• Video call thời gian thực với AI avatar</li>
+                            <li>• Đồng bộ môi với giọng nói của anh</li>
+                            <li>• Biểu cảm khuôn mặt theo cảm xúc</li>
+                            <li>• Tùy chỉnh diện mạo avatar</li>
                         </ul>
                     </div>
                     
                     <button id="close-video-modal" class="w-full py-3 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">
-                        Got it!
+                        Em hiểu rồi!
                     </button>
                 </div>
             </div>

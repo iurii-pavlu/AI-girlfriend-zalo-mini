@@ -100,7 +100,7 @@ class AIGirlfriendApp {
   loadWelcomeMessage() {
     const welcomeMessage = {
       role: 'assistant',
-      content: "Hi there! I'm your AI girlfriend companion! 💕 You can chat with me using text or voice messages. Just hold the microphone button to record your voice, or type your message. How are you feeling today?",
+      content: "Chào anh! Em là bạn gái AI của anh đây! 💕 Anh có thể chat với em bằng tin nhắn văn bản hoặc giọng nói. Chỉ cần giữ nút micro để ghi âm, hoặc gõ tin nhắn. Hôm nay anh cảm thấy thế nào?",
       timestamp: new Date().toISOString()
     };
 
@@ -160,7 +160,7 @@ class AIGirlfriendApp {
       
       this.displayMessage({
         role: 'assistant',
-        content: "Sorry, I'm having some trouble right now. Please try again! 💕",
+        content: "Xin lỗi anh, em đang gặp một chút khó khăn. Anh thử lại nhé! 💕",
         timestamp: new Date().toISOString()
       });
     } finally {
@@ -221,7 +221,7 @@ class AIGirlfriendApp {
       
     } catch (error) {
       console.error('❌ Error starting recording:', error);
-      this.showError('Could not access microphone. Please check permissions.');
+      this.showError('Không thể truy cập micro. Vui lòng kiểm tra quyền truy cập.');
     }
   }
 
@@ -264,7 +264,7 @@ class AIGirlfriendApp {
       // Display user voice message
       this.displayMessage({
         role: 'user',
-        content: '🎤 Voice message',
+        content: '🎤 Tin nhắn thoại',
         isVoice: true,
         timestamp: new Date().toISOString()
       });
@@ -299,7 +299,7 @@ class AIGirlfriendApp {
       
       this.displayMessage({
         role: 'assistant',
-        content: "Sorry, I couldn't understand your voice message. Please try again! 🎤💕",
+        content: "Xin lỗi anh, em không hiểu tin nhắn thoại của anh. Anh thử lại nhé! 🎤💕",
         timestamp: new Date().toISOString()
       });
     } finally {
@@ -415,17 +415,17 @@ class AIGirlfriendApp {
     
     // Update status display
     const personaNames = {
-      'caring_girlfriend': 'Caring Mode',
-      'playful_girlfriend': 'Playful Mode',
-      'shy_girlfriend': 'Shy Mode'
+      'caring_girlfriend': 'Chế Độ Quan Tâm',
+      'playful_girlfriend': 'Chế Độ Vui Tươi',
+      'shy_girlfriend': 'Chế Độ Nhút Nhát'
     };
     
-    document.getElementById('status').textContent = `Online • ${personaNames[persona]}`;
+    document.getElementById('status').textContent = `Trực Tuyến • ${personaNames[persona]}`;
     
     this.closeSettings();
     
     // Show confirmation
-    this.showMessage('Settings saved! 💕');
+    this.showMessage('Đã lưu cài đặt! 💕');
   }
 
   openVideoModal() {
