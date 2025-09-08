@@ -16,11 +16,11 @@
     }
   ],
 
-  // R2 Storage for audio files
-  "r2_buckets": [
-    {
-      "binding": "R2",
-      "bucket_name": "ai-gf-audio"
-    }
-  ]
+  // R2 Storage for audio files (disabled - requires R2 plan)
+  // "r2_buckets": [
+  //   {
+  //     "binding": "R2",
+  //     "bucket_name": "ai-gf-audio"
+  //   }
+  // ]
 }
