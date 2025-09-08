@@ -14,10 +14,28 @@
 ## 🚀 Live Demo
 
 - **Development**: https://3000-i7642hoopwei37i4bg3sp-6532622b.e2b.dev
-- **Production**: Coming soon on Cloudflare Pages
-- **GitHub**: Repository will be created after GitHub authorization
+- **Production**: Ready for Cloudflare Pages deployment
+- **GitHub**: https://github.com/iurii-pavlu/AI-girlfriend-zalo-mini
+- **Project Backup**: [Complete project with Memory Plus](https://page.gensparksite.com/project_backups/tooluse_o22s1gEjTG6XVJeQDkWz6A.tar.gz)
 
 ## ✨ Current Features
+
+### 🧠 **Memory Plus System (Focus Group Priority #1 - Score: 8.3)**
+- [x] **Relationship Memory Storage** - Automatically extracts and stores personal details, preferences, emotions
+- [x] **Memory-Enhanced AI Responses** - Uses conversation history for deeper, personalized interactions
+- [x] **Emotional State Tracking** - Detects and remembers user emotional states (happy, sad, romantic, etc.)
+- [x] **Relationship Progression** - Tracks intimacy levels from 'new' to 'long_term' based on interaction depth
+- [x] **User Profile Management** - Builds comprehensive personality insights and communication preferences
+- [x] **Context-Aware Prompts** - Generates memory-enhanced system prompts for ChatGPT
+- [x] **Vietnamese Pattern Recognition** - Detects Vietnamese personal information and cultural context
+
+### 💰 **Monetization & Viral Growth**
+- [x] **Freemium Model** - 10 free messages, then paywall or referrals
+- [x] **Vietnamese Pricing** - 49,000 VND weekly, 149,000 VND monthly
+- [x] **PayOS Integration** - Vietnamese payment gateway with QR codes
+- [x] **Viral Referral System** - Each friend referral = 1 day free usage
+- [x] **K-Factor Growth Mechanics** - Built for viral coefficient optimization
+- [x] **Subscription Management** - Real-time usage tracking and paywall triggers
 
 ### 💬 **Core Chat Functionality**
 - [x] Telegram-style responsive chat interface
@@ -38,12 +56,19 @@
 - [x] Context-aware conversations with persona system
 - [x] Content filtering for PG-13 compliance (Zalo requirements)
 - [x] Intelligent response generation with emotion support
+- [x] **🧠 Memory Plus System** - Advanced relationship memory and context
+- [x] **Personal Memory Storage** - Remembers user details, preferences, emotions
+- [x] **Relationship Progression** - Tracks conversation depth and intimacy
+- [x] **Memory-Enhanced Prompts** - Deeper, personalized AI responses
 
 ### 💾 **Data Management**
 - [x] Cloudflare D1 SQLite database for sessions/messages
 - [x] Cloudflare R2 storage for audio files
 - [x] Analytics tracking for usage insights
 - [x] Automatic cleanup of old data
+- [x] **🧠 Memory Plus Database** - Relationship memory, user profiles, conversation context
+- [x] **Intelligent Memory Extraction** - Auto-detects and stores important conversation elements
+- [x] **Emotional State Tracking** - Remembers user emotions and relationship milestones
 
 ### 🎬 **Video Call Placeholder**
 - [x] UI placeholder for future video calling
@@ -75,11 +100,19 @@
 
 ### **Chat Endpoints**
 ```
-POST /api/chat          # Text-only chat
-POST /api/message       # Complete pipeline (text or voice → text + audio response)
+POST /api/chat          # Memory-enhanced text chat with relationship context
+POST /api/message       # Complete pipeline (text or voice → memory-enhanced response)
 POST /api/stt          # Speech-to-text only
 POST /api/tts          # Text-to-speech only
 GET  /audio/{filename} # Serve audio files
+```
+
+### **Subscription & Monetization**
+```
+GET  /api/subscription/status           # Check user subscription and message limits
+POST /api/subscription/payment/create  # Create PayOS payment link (Vietnamese)
+POST /api/subscription/payment/webhook # Handle PayOS payment confirmations
+POST /api/subscription/referral        # Process viral referrals (1 day per friend)
 ```
 
 ### **System Endpoints**
@@ -121,6 +154,32 @@ voice_settings (session_id, voice_id, speaking_rate, language)
 
 -- Analytics: Usage tracking
 analytics (id, session_id, event_type, event_data, created_at)
+
+-- 🧠 MEMORY PLUS SYSTEM --
+-- Relationship Memory: Personal details, preferences, emotions, milestones
+relationship_memory (id, user_id, memory_type, content, importance_score, 
+                    emotional_tag, created_at, last_referenced, reference_count)
+
+-- User Profile: Personality insights and communication preferences
+user_profile (user_id, personality_insights, communication_style, interests,
+             relationship_goals, preferred_topics, avoided_topics, cultural_background)
+
+-- Conversation Context: Session summaries and relationship progression
+conversation_context (id, session_id, context_summary, key_topics, emotional_tone, 
+                     relationship_stage, created_at)
+
+-- 💰 SUBSCRIPTION SYSTEM --
+-- User Subscriptions: Freemium model with viral referrals
+user_subscriptions (user_id, subscription_type, start_date, end_date, 
+                   is_active, payment_method, referral_count, bonus_days)
+
+-- Message Usage: Track free message limits and paywall triggers
+message_usage (user_id, daily_count, weekly_count, monthly_count, 
+              last_reset_daily, last_reset_weekly, last_reset_monthly)
+
+-- Payment Orders: PayOS integration for Vietnamese market
+payment_orders (order_code, user_id, amount, currency, description, 
+               status, payment_url, created_at, paid_at)
 ```
 
 ### **Storage Structure (Cloudflare R2)**
@@ -394,4 +453,19 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Made with ❤️ for the Vietnamese market and Zalo Mini App ecosystem**
 
-**Status**: ✅ MVP Complete | 🚀 Ready for Zalo Deployment | 🎬 Video Features Coming Soon
+## 🎯 Focus Group Implementation Status
+
+**Completed Features (Based on User Research):**
+- ✅ **Memory Plus (8.3 score)** - Advanced relationship memory and long arc stories
+  - *Addresses: "Shallow chat, weak memory of past talks" (82 reports)*
+  - *Implementation: Complete memory system with relationship progression*
+
+**Next Priority Features:**
+- ⏳ **Viet Vibes (7.9 score)** - Vietnamese dialect and cultural adaptation
+- ⏳ **Private Mode (7.4 score)** - Privacy and stealth features for discrete usage
+- ⏳ **Ghost Cover (7.1 score)** - Decoy app and hidden entry methods
+- ⏳ **Persona Workshop (7.0 score)** - Customizable AI personalities and appearance
+
+---
+
+**Status**: ✅ Memory Plus Complete | 🧠 Addressing Top User Pain Point | 💰 Monetization Ready | 🚀 Ready for Zalo Deployment
