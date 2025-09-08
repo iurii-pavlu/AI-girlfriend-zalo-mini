@@ -11,6 +11,7 @@ import tts from './routes/tts';
 import message from './routes/message';
 import audio from './routes/audio';
 import subscription from './routes/subscription';
+import privateMode from './routes/private-mode';
 
 // Import video call placeholder
 import { VideoCallManager, IMPLEMENTATION_ROADMAP } from './realtime/placeholder';
@@ -43,6 +44,7 @@ app.route('/api/chat', chat);         // Text chat endpoint
 app.route('/api/tts', tts);           // Text-to-speech endpoint
 app.route('/api/message', message);   // Complete pipeline endpoint
 app.route('/api/subscription', subscription); // Subscription and payment endpoints
+app.route('/api/private', privateMode);       // Private mode and stealth features
 app.route('/audio', audio);           // Audio file serving
 
 // Video call placeholder endpoint
@@ -74,6 +76,43 @@ app.get('/api/health', (c) => {
 
 // Main application route
 app.get('/', (c) => {
+  // Check for private mode parameters
+  const isPrivate = c.req.query('private') === 'true';
+  const stealthSession = c.req.query('stealth');
+  const entryMode = c.req.query('entry') || 'normal';
+  
+  // Add stealth mode detection script if needed
+  const stealthScript = isPrivate ? `
+    <script>
+      // Initialize private mode
+      window.PRIVATE_MODE = true;
+      window.STEALTH_SESSION = '${stealthSession}';
+      window.ENTRY_MODE = '${entryMode}';
+      
+      // Quick exit functionality (Ctrl+Shift+Q)
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'Q') {
+          window.location.href = '/api/private/decoy/calculator';
+        }
+      });
+      
+      // Hide app from browser history in stealth mode
+      if (window.STEALTH_SESSION) {
+        history.replaceState(null, '', '/calculator');
+      }
+      
+      // Add stealth UI indicators
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.PRIVATE_MODE) {
+          const stealthIndicator = document.createElement('div');
+          stealthIndicator.innerHTML = '🔒 Private Mode';
+          stealthIndicator.className = 'fixed top-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded z-50';
+          document.body.appendChild(stealthIndicator);
+        }
+      });
+    </script>
+  ` : '';
+  
   return c.html(`
     <!DOCTYPE html>
     <html lang="en">
@@ -151,6 +190,8 @@ app.get('/', (c) => {
             border-radius: 2px;
           }
         </style>
+        
+        ${stealthScript}
     </head>
     <body class="bg-gray-50 overflow-hidden zalo-safe-area">
         <!-- App Container -->
@@ -415,6 +456,7 @@ app.get('/', (c) => {
         <!-- JavaScript Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/app.js"></script>
+        <script src="/static/private-mode.js"></script>
     </body>
     </html>
   `);

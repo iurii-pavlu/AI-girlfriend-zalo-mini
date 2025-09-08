@@ -12,21 +12,35 @@ class AIGirlfriendApp {
     this.referralStats = null;
     this.selectedPlan = 'monthly';
     
+    // Private Mode properties
+    this.privateMode = window.PRIVATE_MODE || false;
+    this.stealthSession = window.STEALTH_SESSION || null;
+    this.entryMode = window.ENTRY_MODE || 'normal';
+    this.privateModeSettings = null;
+    
     // Initialize app
     this.init();
   }
 
   generateUserId() {
-    let userId = localStorage.getItem('userId');
+    // Use session storage for private mode to avoid persistent tracking
+    const storage = this.privateMode ? sessionStorage : localStorage;
+    
+    let userId = storage.getItem('userId');
     if (!userId) {
       userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(7);
-      localStorage.setItem('userId', userId);
+      storage.setItem('userId', userId);
     }
     return userId;
   }
 
   async init() {
     console.log('🚀 Initializing AI Girlfriend App...');
+    
+    // Initialize private mode if enabled
+    if (this.privateMode) {
+      await this.initializePrivateMode();
+    }
     
     // Check for referral code in URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +50,13 @@ class AIGirlfriendApp {
       // Load subscription status
       await this.loadSubscriptionStatus(referralCode);
       
-      // Show loading for 2 seconds
+      // Load private mode settings if enabled
+      if (this.privateMode) {
+        await this.loadPrivateModeSettings();
+      }
+      
+      // Show loading for 2 seconds (or shorter in stealth mode)
+      const loadingTime = this.privateMode ? 1000 : 2000;
       setTimeout(() => {
         document.getElementById('loading').style.display = 'none';
         document.getElementById('main-app').classList.remove('hidden');
@@ -45,8 +65,12 @@ class AIGirlfriendApp {
         this.loadWelcomeMessage();
         this.updateSubscriptionUI();
         
+        if (this.privateMode) {
+          this.setupPrivateModeUI();
+        }
+        
         console.log('✅ App initialized successfully');
-      }, 2000);
+      }, loadingTime);
     } catch (error) {
       console.error('❌ Initialization error:', error);
       // Continue with app loading even if subscription check fails
