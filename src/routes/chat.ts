@@ -5,6 +5,7 @@ import { OpenAIClient } from '../services/openai';
 import { DatabaseService } from '../services/database';
 import { SubscriptionService } from '../services/subscription';
 import { MemoryPlusService } from '../services/memory-plus';
+import { VietVibesService } from '../services/viet-vibes';
 import { Logger } from '../utils/logger';
 
 const chat = new Hono<{ Bindings: Bindings }>();
@@ -46,6 +47,7 @@ chat.post('/', async (c) => {
     const openai = new OpenAIClient(c.env, sessionId);
     const db = new DatabaseService(c.env, sessionId);
     const memoryService = new MemoryPlusService(c.env, sessionId);
+    const vietVibesService = new VietVibesService(c.env, sessionId);
 
     // Check subscription status (bypass for demo)
     let subscriptionStatus;
@@ -124,36 +126,48 @@ chat.post('/', async (c) => {
       throw new Error('OpenAI API key missing');
     }
 
-    // Generate AI response with memory enhancement
+    // Generate AI response with Memory Plus + Viet Vibes enhancement
     let chatResponse;
     try {
+      // Analyze Vietnamese linguistic patterns in user input
+      const vietAnalysis = await vietVibesService.analyzeVietnamesePatterns(body.text, userId);
+      
       // Process conversation for memories (extract important info from user message)
       await memoryService.processConversationForMemories(userId, body.text, '');
       
       // Update relationship stage
       const relationshipStage = await memoryService.updateRelationshipStage(sessionId, userId);
       
-      // Generate memory-enhanced response
-      chatResponse = await openai.generateResponseWithMemory({
+      // Update Viet Vibes preferences based on detected patterns
+      await vietVibesService.updatePreferencesFromUsage(userId, vietAnalysis);
+      
+      // Generate Viet Vibes + Memory enhanced response
+      chatResponse = await openai.generateResponseWithMemoryAndVibes({
         text: body.text,
         sessionId: sessionId,
         persona: session.persona,
         userId: userId,
-        memoryService: memoryService
+        memoryService: memoryService,
+        vietVibesService: vietVibesService,
+        relationshipStage: relationshipStage,
+        vietAnalysis: vietAnalysis
       });
       
       // After AI response, store any new memories from the conversation
       await memoryService.processConversationForMemories(userId, body.text, chatResponse.reply);
       
-      logger.info('Memory Plus enhanced response', {
+      logger.info('Memory Plus + Viet Vibes enhanced response', {
         relationshipStage,
-        memoriesUsed: true
+        memoriesUsed: true,
+        vietRegion: vietAnalysis.detectedRegion,
+        emotionalTone: vietAnalysis.emotionalTone,
+        culturalRefs: vietAnalysis.culturalReferences.length
       });
       
-    } catch (memoryError) {
-      logger.warn('Memory Plus service failed, falling back to basic response', memoryError);
+    } catch (enhancementError) {
+      logger.warn('Enhanced services failed, falling back to basic response', enhancementError);
       
-      // Fallback to basic response if Memory Plus fails
+      // Fallback to basic response if enhanced services fail
       chatResponse = await openai.generateResponse({
         text: body.text,
         sessionId: sessionId,
