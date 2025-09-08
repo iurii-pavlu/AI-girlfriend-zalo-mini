@@ -1,7 +1,7 @@
 // Cloudflare bindings
 export interface Bindings {
   DB: D1Database;
-  R2: R2Bucket;
+  R2?: R2Bucket;
   OPENAI_API_KEY: string;
   GOOGLE_API_KEY: string;
   GOOGLE_PROJECT_ID: string;
