@@ -2,29 +2,97 @@
 class AIGirlfriendApp {
   constructor() {
     this.sessionId = localStorage.getItem('sessionId') || null;
+    this.userId = this.generateUserId();
     this.isRecording = false;
     this.mediaRecorder = null;
     this.recordedChunks = [];
     this.recordingStartTime = null;
     this.recordingTimer = null;
+    this.subscriptionStatus = null;
+    this.referralStats = null;
+    this.selectedPlan = 'monthly';
     
     // Initialize app
     this.init();
   }
 
+  generateUserId() {
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+      localStorage.setItem('userId', userId);
+    }
+    return userId;
+  }
+
   async init() {
     console.log('🚀 Initializing AI Girlfriend App...');
     
-    // Show loading for 2 seconds
-    setTimeout(() => {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('main-app').classList.remove('hidden');
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('ref');
+    
+    try {
+      // Load subscription status
+      await this.loadSubscriptionStatus(referralCode);
       
-      this.setupEventListeners();
-      this.loadWelcomeMessage();
+      // Show loading for 2 seconds
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-app').classList.remove('hidden');
+        
+        this.setupEventListeners();
+        this.loadWelcomeMessage();
+        this.updateSubscriptionUI();
+        
+        console.log('✅ App initialized successfully');
+      }, 2000);
+    } catch (error) {
+      console.error('❌ Initialization error:', error);
+      // Continue with app loading even if subscription check fails
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-app').classList.remove('hidden');
+        this.setupEventListeners();
+        this.loadWelcomeMessage();
+      }, 2000);
+    }
+  }
+
+  async loadSubscriptionStatus(referralCode = null) {
+    try {
+      const url = referralCode 
+        ? `/api/subscription/status?ref=${referralCode}` 
+        : '/api/subscription/status';
+        
+      const response = await axios.get(url, {
+        headers: {
+          'X-User-Id': this.userId
+        }
+      });
+
+      const data = response.data;
+      this.subscriptionStatus = data.subscription;
+      this.referralStats = data.referral;
       
-      console.log('✅ App initialized successfully');
-    }, 2000);
+      console.log('📊 Subscription status loaded:', this.subscriptionStatus);
+      
+      // Show welcome bonus if referred
+      if (referralCode && data.user) {
+        this.showMessage('Chào mừng! Anh đã được tặng 1 ngày miễn phí! 🎁');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error loading subscription:', error);
+      // Set default status
+      this.subscriptionStatus = {
+        canChat: true,
+        messagesLeft: 10,
+        subscriptionType: 'free',
+        needsPayment: false,
+        showPaywall: false
+      };
+    }
   }
 
   setupEventListeners() {
@@ -81,6 +149,40 @@ class AIGirlfriendApp {
       document.getElementById('rate-display').textContent = `${e.target.value}x`;
     });
 
+    // Subscription and payment events
+    document.getElementById('close-paywall').addEventListener('click', () => {
+      this.closePaywall();
+    });
+    document.getElementById('invite-friends').addEventListener('click', () => {
+      this.openReferral();
+    });
+    document.getElementById('subscribe-now').addEventListener('click', () => {
+      this.startSubscription();
+    });
+
+    // Referral events
+    document.getElementById('close-referral').addEventListener('click', () => {
+      this.closeReferral();
+    });
+    document.getElementById('share-referral').addEventListener('click', () => {
+      this.shareReferral();
+    });
+    document.getElementById('copy-referral').addEventListener('click', () => {
+      this.copyReferralLink();
+    });
+
+    // Payment events
+    document.getElementById('close-payment-success').addEventListener('click', () => {
+      this.closePaymentModal();
+    });
+
+    // Plan selection
+    document.querySelectorAll('[data-plan]').forEach(plan => {
+      plan.addEventListener('click', () => {
+        this.selectPlan(plan.dataset.plan);
+      });
+    });
+
     // Close modals when clicking outside
     document.getElementById('settings-modal').addEventListener('click', (e) => {
       if (e.target.id === 'settings-modal') {
@@ -91,6 +193,18 @@ class AIGirlfriendApp {
     document.getElementById('video-modal').addEventListener('click', (e) => {
       if (e.target.id === 'video-modal') {
         this.closeVideoModal();
+      }
+    });
+
+    document.getElementById('paywall-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'paywall-modal') {
+        this.closePaywall();
+      }
+    });
+
+    document.getElementById('referral-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'referral-modal') {
+        this.closeReferral();
       }
     });
 
@@ -113,6 +227,13 @@ class AIGirlfriendApp {
     
     if (!text) return;
 
+    // Check subscription before sending
+    if (!this.subscriptionStatus || !this.subscriptionStatus.canChat) {
+      if (this.checkAndShowPaywall()) {
+        return;
+      }
+    }
+
     // Clear input and disable send button
     input.value = '';
     this.setLoading(true);
@@ -127,13 +248,14 @@ class AIGirlfriendApp {
     try {
       console.log('📤 Sending text message:', text);
 
-      const response = await axios.post('/api/message', {
+      const response = await axios.post('/api/chat', {
         text: text,
         sessionId: this.sessionId
       }, {
         headers: {
           'Content-Type': 'application/json',
-          'X-Session-Id': this.sessionId || ''
+          'X-Session-Id': this.sessionId || '',
+          'X-User-Id': this.userId
         }
       });
 
@@ -145,18 +267,40 @@ class AIGirlfriendApp {
         localStorage.setItem('sessionId', this.sessionId);
       }
 
+      // Update subscription status
+      if (data.subscriptionStatus) {
+        this.subscriptionStatus = data.subscriptionStatus;
+        this.updateSubscriptionUI();
+      }
+
       // Display assistant response
       this.displayMessage({
         role: 'assistant',
-        content: data.text,
-        audioUrl: data.audioUrl,
+        content: data.reply,
         timestamp: new Date().toISOString()
       });
+
+      // Check if should show paywall after this message
+      if (data.showPaywall) {
+        setTimeout(() => {
+          this.openPaywall();
+        }, 1000);
+      }
 
       console.log('✅ Message sent successfully');
       
     } catch (error) {
       console.error('❌ Error sending message:', error);
+      
+      // Handle subscription limit errors
+      if (error.response && error.response.status === 403) {
+        const errorData = error.response.data;
+        if (errorData.needsPayment) {
+          this.subscriptionStatus = errorData.subscriptionStatus;
+          this.openPaywall();
+          return;
+        }
+      }
       
       this.displayMessage({
         role: 'assistant',
@@ -459,6 +603,207 @@ class AIGirlfriendApp {
     setTimeout(() => {
       toast.remove();
     }, 5000);
+  }
+
+  // Subscription and Payment Methods
+  updateSubscriptionUI() {
+    if (!this.subscriptionStatus) return;
+
+    // Update header status
+    const statusEl = document.getElementById('status');
+    if (this.subscriptionStatus.subscriptionType !== 'free') {
+      statusEl.textContent = 'Trực Tuyến • Premium ⭐';
+    } else {
+      statusEl.textContent = `Trực Tuyến • ${this.subscriptionStatus.messagesLeft} tin nhắn còn lại`;
+    }
+  }
+
+  checkAndShowPaywall() {
+    if (this.subscriptionStatus && this.subscriptionStatus.showPaywall) {
+      this.openPaywall();
+      return true;
+    }
+    return false;
+  }
+
+  openPaywall() {
+    document.getElementById('paywall-modal').classList.remove('hidden');
+  }
+
+  closePaywall() {
+    document.getElementById('paywall-modal').classList.add('hidden');
+  }
+
+  selectPlan(plan) {
+    this.selectedPlan = plan;
+    
+    // Update UI selection
+    document.querySelectorAll('[data-plan]').forEach(p => {
+      p.classList.remove('border-girlfriend-500', 'bg-girlfriend-100');
+      p.classList.add('border-girlfriend-200');
+    });
+    
+    const selectedEl = document.querySelector(`[data-plan="${plan}"]`);
+    selectedEl.classList.remove('border-girlfriend-200');
+    selectedEl.classList.add('border-girlfriend-500', 'bg-girlfriend-100');
+  }
+
+  async startSubscription() {
+    try {
+      this.setLoading(true);
+      this.closePaywall();
+
+      const response = await axios.post('/api/subscription/payment/create', {
+        subscriptionType: this.selectedPlan
+      }, {
+        headers: {
+          'X-User-Id': this.userId,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = response.data;
+      
+      if (data.success && data.paymentUrl) {
+        // Open PayOS payment page
+        window.open(data.paymentUrl, '_blank');
+        
+        // Start checking payment status
+        this.checkPaymentStatus(data.orderCode);
+        
+        this.showMessage('Đã mở trang thanh toán. Vui lòng hoàn tất thanh toán! 💳');
+      } else {
+        throw new Error(data.error || 'Không thể tạo thanh toán');
+      }
+
+    } catch (error) {
+      console.error('❌ Payment creation error:', error);
+      this.showError('Lỗi tạo thanh toán. Vui lòng thử lại.');
+    } finally {
+      this.setLoading(false);
+    }
+  }
+
+  async checkPaymentStatus(orderCode, attempts = 0) {
+    const maxAttempts = 60; // 5 minutes
+    
+    try {
+      const response = await axios.get(`/api/subscription/payment/status/${orderCode}`, {
+        headers: {
+          'X-User-Id': this.userId
+        }
+      });
+
+      const payment = response.data;
+      
+      if (payment.status === 'paid') {
+        await this.loadSubscriptionStatus();
+        this.showPaymentSuccess();
+        return;
+      }
+      
+      if (payment.status === 'failed' || payment.status === 'cancelled') {
+        this.showError('Thanh toán thất bại hoặc bị hủy.');
+        return;
+      }
+      
+      // Continue checking if pending and haven't exceeded max attempts
+      if (payment.status === 'pending' && attempts < maxAttempts) {
+        setTimeout(() => {
+          this.checkPaymentStatus(orderCode, attempts + 1);
+        }, 5000); // Check every 5 seconds
+      }
+
+    } catch (error) {
+      console.error('❌ Payment status check error:', error);
+      if (attempts < maxAttempts) {
+        setTimeout(() => {
+          this.checkPaymentStatus(orderCode, attempts + 1);
+        }, 5000);
+      }
+    }
+  }
+
+  showPaymentSuccess() {
+    document.getElementById('payment-modal').classList.remove('hidden');
+    document.getElementById('payment-processing').classList.add('hidden');
+    document.getElementById('payment-success').classList.remove('hidden');
+    this.updateSubscriptionUI();
+  }
+
+  closePaymentModal() {
+    document.getElementById('payment-modal').classList.add('hidden');
+    document.getElementById('payment-processing').classList.remove('hidden');
+    document.getElementById('payment-success').classList.add('hidden');
+  }
+
+  // Referral Methods
+  async openReferral() {
+    try {
+      this.closePaywall();
+      
+      const response = await axios.get('/api/subscription/referral', {
+        headers: {
+          'X-User-Id': this.userId
+        }
+      });
+
+      const data = response.data;
+      this.referralData = data;
+      
+      // Update referral modal
+      document.getElementById('referral-code').textContent = data.referralCode;
+      document.getElementById('referrals-count').textContent = `${data.stats.referralsCount} bạn`;
+      document.getElementById('bonus-days').textContent = `${data.stats.bonusDaysEarned} ngày`;
+      
+      document.getElementById('referral-modal').classList.remove('hidden');
+
+    } catch (error) {
+      console.error('❌ Referral loading error:', error);
+      this.showError('Không thể tải thông tin giới thiệu.');
+    }
+  }
+
+  closeReferral() {
+    document.getElementById('referral-modal').classList.add('hidden');
+  }
+
+  shareReferral() {
+    if (!this.referralData) return;
+    
+    const message = this.referralData.shareMessage;
+    
+    // Try to share via Zalo Mini App API if available
+    if (window.ZaloMiniApp) {
+      window.ZaloMiniApp.shareMessage({
+        message: message
+      });
+    } else {
+      // Fallback - copy to clipboard
+      this.copyToClipboard(message);
+      this.showMessage('Đã sao chép tin nhắn giới thiệu! 📋');
+    }
+  }
+
+  copyReferralLink() {
+    if (!this.referralData) return;
+    
+    this.copyToClipboard(this.referralData.referralUrl);
+    this.showMessage('Đã sao chép liên kết giới thiệu! 📋');
+  }
+
+  copyToClipboard(text) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
   }
 }
 

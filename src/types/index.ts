@@ -13,6 +13,17 @@ export interface Bindings {
   ALLOWED_ORIGINS: string;
   ENABLE_CONTENT_FILTER: string;
   FILTER_SEVERITY: string;
+  
+  // PayOS Integration
+  PAYOS_CLIENT_ID: string;
+  PAYOS_API_KEY: string;
+  PAYOS_CHECKSUM_KEY: string;
+  
+  // Pricing & Limits
+  WEEKLY_PRICE_VND: string;
+  MONTHLY_PRICE_VND: string;
+  FREE_MESSAGES_LIMIT: string;
+  REFERRAL_BONUS_DAYS: string;
 }
 
 // Database models
@@ -84,4 +95,70 @@ export interface ContentFilterResult {
   isAllowed: boolean;
   reason?: string;
   filteredText?: string;
+}
+
+// Subscription and Payment types
+export interface User {
+  id: string;
+  email?: string;
+  phone?: string;
+  referral_code: string;
+  referred_by?: string;
+  subscription_type: 'free' | 'weekly' | 'monthly';
+  subscription_expires_at?: string;
+  messages_used: number;
+  created_at: string;
+  last_active: string;
+}
+
+export interface Referral {
+  id: number;
+  referrer_id: string;
+  referred_id: string;
+  reward_days: number;
+  claimed: boolean;
+  created_at: string;
+}
+
+export interface PaymentRequest {
+  orderCode: number;
+  amount: number;
+  description: string;
+  cancelUrl: string;
+  returnUrl: string;
+  signature?: string;
+}
+
+export interface PaymentResponse {
+  error: number;
+  message: string;
+  data?: {
+    bin: string;
+    accountNumber: string;
+    accountName: string;
+    amount: number;
+    description: string;
+    orderCode: number;
+    currency: string;
+    paymentLinkId: string;
+    status: string;
+    checkoutUrl: string;
+    qrCode: string;
+  };
+}
+
+export interface SubscriptionStatus {
+  canChat: boolean;
+  messagesLeft: number;
+  subscriptionType: string;
+  expiresAt?: string;
+  needsPayment: boolean;
+  showPaywall: boolean;
+}
+
+export interface ReferralStats {
+  referralCode: string;
+  referralsCount: number;
+  bonusDaysEarned: number;
+  canEarnMore: boolean;
 }

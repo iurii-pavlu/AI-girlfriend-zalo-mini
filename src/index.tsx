@@ -10,6 +10,7 @@ import chat from './routes/chat';
 import tts from './routes/tts';
 import message from './routes/message';
 import audio from './routes/audio';
+import subscription from './routes/subscription';
 
 // Import video call placeholder
 import { VideoCallManager, IMPLEMENTATION_ROADMAP } from './realtime/placeholder';
@@ -41,6 +42,7 @@ app.route('/api/stt', stt);           // Speech-to-text endpoint
 app.route('/api/chat', chat);         // Text chat endpoint  
 app.route('/api/tts', tts);           // Text-to-speech endpoint
 app.route('/api/message', message);   // Complete pipeline endpoint
+app.route('/api/subscription', subscription); // Subscription and payment endpoints
 app.route('/audio', audio);           // Audio file serving
 
 // Video call placeholder endpoint
@@ -287,6 +289,125 @@ app.get('/', (c) => {
                     <button id="close-video-modal" class="w-full py-3 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">
                         Em hiểu rồi!
                     </button>
+                </div>
+            </div>
+
+            <!-- Paywall Modal -->
+            <div id="paywall-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-heart text-6xl text-girlfriend-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">Nâng Cấp Để Tiếp Tục</h3>
+                        <p class="text-gray-600 mt-2">Anh đã sử dụng hết 10 tin nhắn miễn phí! 💕</p>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <!-- Weekly Plan -->
+                        <div class="border-2 border-girlfriend-200 rounded-lg p-4 hover:border-girlfriend-400 cursor-pointer transition-colors" data-plan="weekly">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Gói 1 Tuần</h4>
+                                    <p class="text-sm text-gray-600">Tin nhắn không giới hạn</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xl font-bold text-girlfriend-600">49.000 VNĐ</div>
+                                    <div class="text-sm text-gray-500">~7.000 VNĐ/ngày</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Plan -->
+                        <div class="border-2 border-girlfriend-400 bg-girlfriend-50 rounded-lg p-4 relative cursor-pointer" data-plan="monthly">
+                            <div class="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                <span class="bg-girlfriend-500 text-white px-3 py-1 rounded-full text-xs font-medium">PHỔ BIẾN</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Gói 1 Tháng</h4>
+                                    <p class="text-sm text-gray-600">Tiết kiệm 69% • Không giới hạn</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xl font-bold text-girlfriend-600">149.000 VNĐ</div>
+                                    <div class="text-sm text-gray-500 line-through">480.000 VNĐ</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button id="close-paywall" class="flex-1 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                            Để sau
+                        </button>
+                        <button id="invite-friends" class="flex-1 py-3 bg-green-500 text-white rounded-md hover:bg-green-600">
+                            Mời bạn bè
+                        </button>
+                        <button id="subscribe-now" class="flex-1 py-3 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">
+                            Nâng cấp
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral Modal -->
+            <div id="referral-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-users text-6xl text-green-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">Mời Bạn Bè - Nhận Thưởng</h3>
+                        <p class="text-gray-600 mt-2">Mỗi bạn bè = 1 ngày miễn phí! 🎁</p>
+                    </div>
+
+                    <div class="bg-green-50 rounded-lg p-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600" id="referral-code">LOADING...</div>
+                            <p class="text-sm text-green-700 mt-1">Mã giới thiệu của anh</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Đã giới thiệu:</span>
+                            <span class="font-medium" id="referrals-count">0 bạn</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Ngày thưởng:</span>
+                            <span class="font-medium text-green-600" id="bonus-days">0 ngày</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button id="share-referral" class="w-full py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center justify-center">
+                            <i class="fab fa-facebook-messenger mr-2"></i>
+                            Chia sẻ qua Zalo
+                        </button>
+                        <button id="copy-referral" class="w-full py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 flex items-center justify-center">
+                            <i class="fas fa-copy mr-2"></i>
+                            Sao chép liên kết
+                        </button>
+                        <button id="close-referral" class="w-full py-3 text-gray-500 hover:text-gray-700">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Processing Modal -->
+            <div id="payment-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md text-center">
+                    <div id="payment-processing" class="hidden">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-girlfriend-500 mx-auto mb-4"></div>
+                        <h3 class="text-lg font-semibold text-gray-800">Đang xử lý thanh toán...</h3>
+                        <p class="text-gray-600 mt-2">Vui lòng đợi trong giây lát</p>
+                    </div>
+                    
+                    <div id="payment-success" class="hidden">
+                        <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Thanh toán thành công!</h3>
+                        <p class="text-gray-600 mt-2">Cảm ơn anh đã nâng cấp! 💕</p>
+                        <button id="close-payment-success" class="w-full mt-4 py-3 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">
+                            Tiếp tục chat
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
