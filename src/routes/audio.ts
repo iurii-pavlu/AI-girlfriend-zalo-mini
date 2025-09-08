@@ -14,6 +14,12 @@ audio.get('/:filename', async (c) => {
       return c.notFound();
     }
 
+    // Check if R2 is available
+    if (!c.env.R2) {
+      logger.warn('R2 storage not configured', { filename });
+      return c.notFound();
+    }
+
     // Get audio file from R2 storage
     const audioKey = `audio/${filename}`;
     const audioObject = await c.env.R2.get(audioKey);

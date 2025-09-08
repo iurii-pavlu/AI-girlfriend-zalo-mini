@@ -99,23 +99,33 @@ message.post('/', async (c) => {
       persona: session.persona
     });
 
-    // Convert response to speech
-    const audioBuffer = await googleClient.textToSpeech({
-      text: chatResponse.reply
-    });
+    // Convert response to speech and handle storage
+    let audioUrl: string | undefined;
+    
+    try {
+      const audioBuffer = await googleClient.textToSpeech({
+        text: chatResponse.reply
+      });
 
-    // Store audio in R2 (Cloudflare object storage)
-    const audioFilename = generateAudioFilename();
-    await c.env.R2.put(audioFilename, audioBuffer, {
-      httpMetadata: {
-        contentType: 'audio/mpeg'
+      // Store audio in R2 if available, otherwise skip audio storage
+      if (c.env.R2) {
+        const audioFilename = generateAudioFilename();
+        await c.env.R2.put(audioFilename, audioBuffer, {
+          httpMetadata: {
+            contentType: 'audio/mpeg'
+          }
+        });
+        
+        // Generate public URL for audio
+        audioUrl = `${c.env.APP_BASE_URL}/audio/${audioFilename}`;
+      } else {
+        logger.warn('R2 storage not configured, skipping audio storage');
       }
-    });
+    } catch (audioError) {
+      logger.warn('Failed to generate audio, continuing with text only', audioError);
+    }
 
-    // Generate public URL for audio
-    const audioUrl = `${c.env.APP_BASE_URL}/audio/${audioFilename}`;
-
-    // Save assistant message with audio URL
+    // Save assistant message with audio URL (if available)
     await db.saveMessage(sessionId, chatResponse.reply, 'assistant', 'voice', audioUrl);
 
     // Log analytics
