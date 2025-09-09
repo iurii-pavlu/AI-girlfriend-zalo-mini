@@ -1,0 +1,42 @@
+{
+  "sticker_packs": [
+    {
+      "id": "girlfriend_pack_1",
+      "name": "Bạn Gái Yêu Thương",
+      "description": "Sticker dành cho bạn gái AI dễ thương",
+      "cover": "/static/stickers/packs/girlfriend_pack_1/cover.png",
+      "stickers": [
+        {
+          "id": "heart_eyes",
+          "name": "Tim Mắt",
+          "file": "/static/stickers/packs/girlfriend_pack_1/heart_eyes.png",
+          "keywords": ["yêu", "thích", "tim", "đẹp trai"]
+        },
+        {
+          "id": "kiss",
+          "name": "Hôn",
+          "file": "/static/stickers/packs/girlfriend_pack_1/kiss.png",
+          "keywords": ["hôn", "yêu", "thương", "cưng"]
+        },
+        {
+          "id": "shy",
+          "name": "Xấu Hổ",
+          "file": "/static/stickers/packs/girlfriend_pack_1/shy.png",
+          "keywords": ["xấu hổ", "ngại", "thẹn", "cute"]
+        },
+        {
+          "id": "happy",
+          "name": "Vui Vẻ",
+          "file": "/static/stickers/packs/girlfriend_pack_1/happy.png",
+          "keywords": ["vui", "hạnh phúc", "cười", "tuyệt vời"]
+        },
+        {
+          "id": "miss_you",
+          "name": "Nhớ Anh",
+          "file": "/static/stickers/packs/girlfriend_pack_1/miss_you.png",
+          "keywords": ["nhớ", "nhớ anh", "xa", "cô đơn"]
+        }
+      ]
+    }
+  ]
+}

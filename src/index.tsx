@@ -118,15 +118,19 @@ app.get('/', (c) => {
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
         <title>Bạn Gái AI - Zalo Mini App</title>
         <meta name="description" content="Người bạn gái AI dịu dàng, quan tâm với tính năng chat giọng nói">
         
-        <!-- Zalo Mini App optimizations -->
+        <!-- Mobile Safari optimizations -->
         <meta name="format-detection" content="telephone=no">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-touch-fullscreen" content="yes">
+        
+        <!-- Prevent Safari address bar suggestions from covering input -->
+        <meta name="theme-color" content="#ec4899">
         
         <!-- Styles -->
         <script src="https://cdn.tailwindcss.com"></script>
@@ -168,6 +172,35 @@ app.get('/', (c) => {
             overscroll-behavior: none;
             -webkit-overflow-scrolling: touch;
             touch-action: manipulation;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          
+          /* Fix Safari mobile input issues */
+          #app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            overflow: hidden;
+          }
+          
+          /* Prevent Safari address bar interference */
+          input[type="text"] {
+            -webkit-appearance: none;
+            -webkit-border-radius: 0;
+            border-radius: 0;
+          }
+          
+          /* Force Safari to respect viewport */
+          html {
+            position: fixed;
+            height: 100%;
+            overflow: hidden;
           }
           
           /* Zalo Mini App specific optimizations */
@@ -238,10 +271,13 @@ app.get('/', (c) => {
                 </div>
                 
                 <!-- Input Area -->
-                <div class="bg-white border-t border-gray-200 p-4">
+                <div class="bg-white border-t border-gray-200 p-4 sticky bottom-0" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
                     <div class="flex items-center space-x-2">
                         <button id="voice-btn" class="p-3 rounded-full bg-girlfriend-100 text-girlfriend-600 hover:bg-girlfriend-200 transition-colors">
                             <i class="fas fa-microphone"></i>
+                        </button>
+                        <button id="sticker-btn" class="p-3 rounded-full bg-girlfriend-100 text-girlfriend-600 hover:bg-girlfriend-200 transition-colors">
+                            <i class="fas fa-smile"></i>
                         </button>
                         <div class="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-2">
                             <input 
@@ -255,6 +291,14 @@ app.get('/', (c) => {
                         <button id="send-btn" class="p-3 rounded-full bg-girlfriend-500 text-white hover:bg-girlfriend-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             <i class="fas fa-paper-plane"></i>
                         </button>
+                    </div>
+                    
+                    <!-- Sticker Picker -->
+                    <div id="sticker-picker" class="hidden mt-3 p-3 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <div class="text-sm text-gray-600 mb-2 font-medium">Chọn sticker:</div>
+                        <div id="sticker-grid" class="grid grid-cols-6 gap-2">
+                            <!-- Stickers will be loaded here -->
+                        </div>
                     </div>
                     
                     <!-- Voice Recording Indicator -->

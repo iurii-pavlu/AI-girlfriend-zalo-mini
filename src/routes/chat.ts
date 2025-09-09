@@ -6,6 +6,7 @@ import { DatabaseService } from '../services/database';
 import { SubscriptionService } from '../services/subscription';
 import { MemoryPlusService } from '../services/memory-plus';
 import { VietVibesService } from '../services/viet-vibes';
+import { StickerService } from '../services/sticker';
 import { Logger } from '../utils/logger';
 
 const chat = new Hono<{ Bindings: Bindings }>();
@@ -175,9 +176,24 @@ chat.post('/', async (c) => {
       });
     }
 
+    // Check if AI should send a sticker with the response
+    let stickerUrl = null;
+    try {
+      const stickerService = new StickerService();
+      if (stickerService.shouldSendSticker(chatResponse.reply)) {
+        const sticker = await stickerService.findStickerForMessage(chatResponse.reply);
+        if (sticker) {
+          stickerUrl = sticker.file;
+          logger.info('Adding sticker to response', { sticker: sticker.id });
+        }
+      }
+    } catch (error) {
+      logger.warn('Failed to process sticker', error);
+    }
+
     // Save assistant message (with error handling)
     try {
-      await db.saveMessage(sessionId, chatResponse.reply, 'assistant');
+      await db.saveMessage(sessionId, chatResponse.reply, 'assistant', 'text', stickerUrl);
     } catch (error) {
       logger.warn('Failed to save assistant message', error);
     }
@@ -207,7 +223,8 @@ chat.post('/', async (c) => {
       reply: chatResponse.reply,
       sessionId: sessionId,
       subscriptionStatus: newStatus,
-      showPaywall: newStatus.showPaywall
+      showPaywall: newStatus.showPaywall,
+      stickerUrl: stickerUrl
     };
 
     logger.info('Chat completed successfully', {

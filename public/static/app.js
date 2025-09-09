@@ -138,6 +138,11 @@ class AIGirlfriendApp {
     voiceBtn.addEventListener('mousedown', () => this.startRecording());
     voiceBtn.addEventListener('mouseup', () => this.stopRecording());
     voiceBtn.addEventListener('mouseleave', () => this.stopRecording());
+
+    // Sticker picker button
+    document.getElementById('sticker-btn').addEventListener('click', () => {
+      this.toggleStickerPicker();
+    });
     
     // Touch events for mobile
     voiceBtn.addEventListener('touchstart', (e) => {
@@ -297,10 +302,11 @@ class AIGirlfriendApp {
         this.updateSubscriptionUI();
       }
 
-      // Display assistant response
+      // Display assistant response with sticker if available
       this.displayMessage({
         role: 'assistant',
         content: data.reply,
+        stickerUrl: data.stickerUrl,
         timestamp: new Date().toISOString()
       });
 
@@ -499,6 +505,15 @@ class AIGirlfriendApp {
       `;
     }
 
+    let stickerDisplay = '';
+    if (message.stickerUrl) {
+      stickerDisplay = `
+        <div class="mt-2">
+          <img src="${message.stickerUrl}" alt="Sticker" class="w-20 h-20 object-contain rounded-lg">
+        </div>
+      `;
+    }
+
     messageDiv.innerHTML = `
       <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
         isUser 
@@ -514,6 +529,7 @@ class AIGirlfriendApp {
           <div class="flex-1">
             <div class="text-sm ${message.isVoice ? 'italic' : ''}">${message.content}</div>
             ${audioPlayer}
+            ${stickerDisplay}
             <div class="text-xs ${isUser ? 'text-girlfriend-100' : 'text-gray-400'} mt-1">${time}</div>
           </div>
         </div>
@@ -827,6 +843,144 @@ class AIGirlfriendApp {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
+    }
+  }
+
+  // Sticker System Methods
+  async toggleStickerPicker() {
+    const stickerPicker = document.getElementById('sticker-picker');
+    
+    if (stickerPicker.classList.contains('hidden')) {
+      await this.loadStickerPacks();
+      stickerPicker.classList.remove('hidden');
+    } else {
+      stickerPicker.classList.add('hidden');
+    }
+  }
+
+  async loadStickerPacks() {
+    try {
+      // Load default stickers (you can expand this to load from server)
+      const stickerGrid = document.getElementById('sticker-grid');
+      
+      // Default sticker pack (placeholders for now)
+      const defaultStickers = [
+        { id: 'heart_eyes', name: '😍', url: '/static/stickers/packs/girlfriend_pack_1/heart_eyes.png' },
+        { id: 'kiss', name: '😘', url: '/static/stickers/packs/girlfriend_pack_1/kiss.png' },
+        { id: 'shy', name: '😊', url: '/static/stickers/packs/girlfriend_pack_1/shy.png' },
+        { id: 'happy', name: '😄', url: '/static/stickers/packs/girlfriend_pack_1/happy.png' },
+        { id: 'miss_you', name: '🥺', url: '/static/stickers/packs/girlfriend_pack_1/miss_you.png' },
+        // Emoji fallbacks for now
+        { id: 'love', name: '❤️', url: null },
+        { id: 'cute', name: '🥰', url: null },
+        { id: 'wink', name: '😉', url: null },
+        { id: 'blush', name: '😊', url: null },
+        { id: 'heart', name: '💕', url: null },
+        { id: 'star', name: '⭐', url: null },
+        { id: 'flower', name: '🌸', url: null }
+      ];
+
+      stickerGrid.innerHTML = defaultStickers.map(sticker => `
+        <button class="sticker-item p-2 rounded-lg hover:bg-girlfriend-100 transition-colors text-2xl" 
+                data-sticker-id="${sticker.id}" 
+                data-sticker-url="${sticker.url || ''}"
+                title="${sticker.name}">
+          ${sticker.url ? `<img src="${sticker.url}" alt="${sticker.name}" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display: none;">${sticker.name}</span>` : sticker.name}
+        </button>
+      `).join('');
+
+      // Add click listeners to sticker items
+      document.querySelectorAll('.sticker-item').forEach(item => {
+        item.addEventListener('click', () => {
+          this.sendSticker(item.dataset.stickerId, item.dataset.stickerUrl, item.textContent.trim());
+        });
+      });
+
+    } catch (error) {
+      console.error('❌ Error loading stickers:', error);
+    }
+  }
+
+  sendSticker(stickerId, stickerUrl, fallbackEmoji) {
+    // Hide sticker picker
+    document.getElementById('sticker-picker').classList.add('hidden');
+    
+    // Display sticker message immediately
+    this.displayMessage({
+      role: 'user',
+      content: fallbackEmoji,
+      stickerUrl: stickerUrl || null,
+      timestamp: new Date().toISOString()
+    });
+
+    // Send sticker to AI (treated as text message with sticker context)
+    this.sendTextMessageWithSticker(fallbackEmoji, stickerId);
+  }
+
+  async sendTextMessageWithSticker(text, stickerId) {
+    try {
+      // Check subscription before sending
+      if (!this.subscriptionStatus || !this.subscriptionStatus.canChat) {
+        if (this.checkAndShowPaywall()) {
+          return;
+        }
+      }
+
+      this.setLoading(true);
+
+      const response = await axios.post('/api/chat', {
+        text: `[STICKER:${stickerId}] ${text}`, // Add sticker context for AI
+        sessionId: this.sessionId
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-Id': this.sessionId || '',
+          'X-User-Id': this.userId
+        }
+      });
+
+      const data = response.data;
+      
+      // Update session ID
+      if (data.sessionId) {
+        this.sessionId = data.sessionId;
+        localStorage.setItem('sessionId', this.sessionId);
+      }
+
+      // Update subscription status
+      if (data.subscriptionStatus) {
+        this.subscriptionStatus = data.subscriptionStatus;
+        this.updateSubscriptionUI();
+      }
+
+      // Display assistant response with sticker if available
+      this.displayMessage({
+        role: 'assistant',
+        content: data.reply,
+        stickerUrl: data.stickerUrl,
+        timestamp: new Date().toISOString()
+      });
+
+      // Check if should show paywall after this message
+      if (data.showPaywall) {
+        setTimeout(() => {
+          this.openPaywall();
+        }, 1000);
+      }
+
+      console.log('✅ Sticker message sent successfully');
+      
+    } catch (error) {
+      console.error('❌ Error sending sticker:', error);
+      
+      this.displayMessage({
+        role: 'assistant',
+        content: "Xin lỗi anh, em đang gặp một chút khó khăn. Anh thử lại nhé! 💕",
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      this.setLoading(false);
     }
   }
 }
