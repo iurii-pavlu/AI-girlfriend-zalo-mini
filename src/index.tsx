@@ -12,6 +12,7 @@ import message from './routes/message';
 import audio from './routes/audio';
 import subscription from './routes/subscription';
 import privateMode from './routes/private-mode';
+import zalo from './routes/zalo';
 
 // Import video call placeholder
 import { VideoCallManager, IMPLEMENTATION_ROADMAP } from './realtime/placeholder';
@@ -45,6 +46,7 @@ app.route('/api/tts', tts);           // Text-to-speech endpoint
 app.route('/api/message', message);   // Complete pipeline endpoint
 app.route('/api/subscription', subscription); // Subscription and payment endpoints
 app.route('/api/private', privateMode);       // Private mode and stealth features
+app.route('/api/zalo', zalo);         // Zalo Mini App integration
 app.route('/audio', audio);           // Audio file serving
 
 // Video call placeholder endpoint
@@ -497,6 +499,9 @@ app.get('/', (c) => {
             </div>
         </div>
 
+        <!-- Zalo Mini App SDK -->
+        <script src="https://stc-miniapp.zdn.vn/mini-app/sdk/1.0.0/sdk.js"></script>
+        
         <!-- JavaScript Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/app.js"></script>

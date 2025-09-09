@@ -2,7 +2,9 @@
 class AIGirlfriendApp {
   constructor() {
     this.sessionId = localStorage.getItem('sessionId') || null;
-    this.userId = this.generateUserId();
+    this.userId = null; // Will be set after Zalo authentication
+    this.zaloUserId = null;
+    this.zaloUserInfo = null;
     this.isRecording = false;
     this.mediaRecorder = null;
     this.recordedChunks = [];
@@ -22,13 +24,60 @@ class AIGirlfriendApp {
     this.init();
   }
 
-  generateUserId() {
+  async initializeZaloUser() {
+    try {
+      // Check if Zalo Mini App SDK is available
+      if (typeof ZaloMiniApp !== 'undefined') {
+        console.log('🔄 Authenticating with Zalo...');
+        
+        // Get Zalo user info
+        const userInfo = await new Promise((resolve, reject) => {
+          ZaloMiniApp.getUserInfo({
+            success: (data) => {
+              console.log('✅ Zalo user authenticated:', data.userInfo);
+              resolve(data.userInfo);
+            },
+            error: (error) => {
+              console.error('❌ Zalo authentication failed:', error);
+              reject(error);
+            }
+          });
+        });
+
+        if (userInfo && userInfo.id) {
+          this.zaloUserId = userInfo.id;
+          this.zaloUserInfo = userInfo;
+          this.userId = `zalo_${userInfo.id}`;
+          
+          console.log('✅ Zalo user set:', { 
+            zaloUserId: this.zaloUserId, 
+            userId: this.userId,
+            name: userInfo.name 
+          });
+          
+          return true;
+        }
+      }
+      
+      // Fallback to generated user ID if Zalo not available
+      console.log('⚠️ Zalo SDK not available, using fallback user ID');
+      this.userId = this.generateFallbackUserId();
+      return false;
+      
+    } catch (error) {
+      console.error('❌ Error initializing Zalo user:', error);
+      this.userId = this.generateFallbackUserId();
+      return false;
+    }
+  }
+
+  generateFallbackUserId() {
     // Use session storage for private mode to avoid persistent tracking
     const storage = this.privateMode ? sessionStorage : localStorage;
     
     let userId = storage.getItem('userId');
     if (!userId) {
-      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+      userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(7);
       storage.setItem('userId', userId);
     }
     return userId;
@@ -42,12 +91,15 @@ class AIGirlfriendApp {
       await this.initializePrivateMode();
     }
     
+    // Initialize Zalo user authentication
+    await this.initializeZaloUser();
+    
     // Check for referral code in URL
     const urlParams = new URLSearchParams(window.location.search);
     const referralCode = urlParams.get('ref');
     
     try {
-      // Load subscription status
+      // Load subscription status with real user ID
       await this.loadSubscriptionStatus(referralCode);
       
       // Load private mode settings if enabled
@@ -85,6 +137,26 @@ class AIGirlfriendApp {
 
   async loadSubscriptionStatus(referralCode = null) {
     try {
+      // If we have Zalo user, validate through Zalo endpoint
+      if (this.zaloUserId) {
+        const response = await axios.post('/api/zalo/validate-user', {
+          zaloUserId: this.zaloUserId,
+          userInfo: this.zaloUserInfo,
+          referralCode: referralCode
+        });
+
+        const data = response.data;
+        if (data.success) {
+          this.subscriptionStatus = data.subscriptionStatus;
+          this.referralStats = data.user;
+          this.sessionToken = data.sessionToken;
+          
+          console.log('✅ Zalo user validated:', data);
+          return;
+        }
+      }
+
+      // Fallback to regular subscription status
       const url = referralCode 
         ? `/api/subscription/status?ref=${referralCode}` 
         : '/api/subscription/status';
