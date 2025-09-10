@@ -1,0 +1,133 @@
+{
+  "app_name": "AI Girlfriend",
+  
+  "navigation": {
+    "chat": "Chat",
+    "settings": "Settings",
+    "subscribe": "Subscribe", 
+    "profile": "Profile"
+  },
+
+  "onboarding": {
+    "welcome_title": "Welcome to AI Girlfriend! 💕",
+    "welcome_message": "I'm your AI girlfriend. Let me get to know you better!",
+    "start_now": "Start now",
+    "continue": "Continue",
+    "skip": "Skip",
+    
+    "questions": {
+      "name": "What's your name? I'd love to know what to call you! 😊",
+      "age": "How old are you? I'm curious!",
+      "interests": "What do you like to do in your free time? Tell me!",
+      "personality": "What kind of girlfriend do you want me to be? Gentle, energetic, or mysterious?",
+      "chat_style": "What do you like to chat about? Romance, daily life, or interesting things?"
+    },
+    
+    "personality_types": {
+      "gentle": "Gentle & Caring",
+      "energetic": "Energetic & Fun", 
+      "mysterious": "Mysterious & Alluring",
+      "caring": "Caring & Understanding",
+      "playful": "Playful & Cute"
+    },
+
+    "chat_themes": {
+      "romantic": "Romance & Love",
+      "daily_life": "Daily Life",
+      "adventure": "Adventure & Exploration",
+      "deep_talk": "Deep Conversations",
+      "fun_casual": "Fun & Casual"
+    },
+
+    "completion": "Complete! I understand you now! 💖 Let's start our first conversation!"
+  },
+
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "evening_reminders": "Evening reminders",
+    "notification_settings": "Notification settings",
+    "subscription": "Subscription",
+    "privacy": "Privacy",
+    "about": "About",
+    
+    "language_options": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+
+    "evening_reminder_desc": "Get notifications at 8:00-10:00 PM to chat with your AI girlfriend",
+    "notifications_enabled": "Notifications enabled",
+    "notifications_disabled": "Notifications disabled"
+  },
+
+  "subscription": {
+    "title": "Upgrade Account",
+    "current_plan": "Current plan",
+    "upgrade_now": "Upgrade now",
+    "benefits": "Premium Benefits",
+    
+    "plans": {
+      "free": "Free",
+      "weekly": "Weekly plan",
+      "monthly": "Monthly plan"
+    },
+
+    "features": {
+      "unlimited_messages": "Unlimited messages",
+      "voice_messages": "Voice messages", 
+      "premium_personalities": "Premium personalities",
+      "priority_support": "Priority support",
+      "no_ads": "No ads"
+    },
+
+    "prices": {
+      "weekly": "49,000₫/week",
+      "monthly": "149,000₫/month"
+    },
+
+    "subscribe_button": "Subscribe to {plan}",
+    "processing": "Processing...",
+    "success": "Subscription successful!",
+    "error": "An error occurred. Please try again."
+  },
+
+  "notifications": {
+    "evening_reminder": "Take 5-10 minutes tonight for your AI girlfriend. Tap to chat 💬",
+    "payment_success": "Payment successful! Premium account activated.",
+    "payment_failed": "Payment failed. Please try again or contact support.",
+    "subscription_expired": "Premium subscription expired. Renew now to continue!"
+  },
+
+  "chat": {
+    "type_message": "Type a message...",
+    "send": "Send",
+    "voice_message": "Voice message",
+    "thinking": "Thinking...",
+    "error": "An error occurred. Please try again.",
+    "limit_reached": "You've reached your message limit. Upgrade to continue!",
+    "welcome_back": "Hello! I missed you! 💕"
+  },
+
+  "errors": {
+    "network_error": "Network connection error",
+    "server_error": "Server error",
+    "validation_error": "Invalid data",
+    "payment_error": "Payment error",
+    "subscription_error": "Subscription error",
+    "try_again": "Try again",
+    "contact_support": "Contact support"
+  },
+
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel", 
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading...",
+    "success": "Success!",
+    "error": "Error!",
+    "yes": "Yes",
+    "no": "No"
+  }
+}

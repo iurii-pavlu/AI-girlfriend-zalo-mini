@@ -13,6 +13,13 @@ import audio from './routes/audio';
 import subscription from './routes/subscription';
 import privateMode from './routes/private-mode';
 import zalo from './routes/zalo';
+import enhancedReferral from './routes/enhanced-referral';
+
+// Import new enterprise features
+import zns from './routes/zns';
+import zalopayIntegration from './routes/zalopay-integration';
+import onboarding from './routes/onboarding';
+import i18nRoutes from './routes/i18n';
 
 // Import video call placeholder
 import { VideoCallManager, IMPLEMENTATION_ROADMAP } from './realtime/placeholder';
@@ -47,7 +54,14 @@ app.route('/api/message', message);   // Complete pipeline endpoint
 app.route('/api/subscription', subscription); // Subscription and payment endpoints
 app.route('/api/private', privateMode);       // Private mode and stealth features
 app.route('/api/zalo', zalo);         // Zalo Mini App integration
+app.route('/api/referral', enhancedReferral); // Enhanced referral system
 app.route('/audio', audio);           // Audio file serving
+
+// New Enterprise Features Routes
+app.route('/api/zns', zns);           // ZNS evening notifications system
+app.route('/api/zalopay', zalopayIntegration); // ZaloPay payments integration
+app.route('/api/onboarding', onboarding);     // Gamified onboarding flow
+app.route('/api/i18n', i18nRoutes);   // Internationalization system
 
 // Video call placeholder endpoint
 app.get('/api/video-call/capabilities', (c) => {
@@ -117,7 +131,7 @@ app.get('/', (c) => {
   
   return c.html(`
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="vi" id="html-root">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -255,6 +269,9 @@ app.get('/', (c) => {
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
+                            <button id="language-btn" class="p-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
+                                <i class="fas fa-globe"></i>
+                            </button>
                             <button id="video-call-btn" class="p-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
                                 <i class="fas fa-video"></i>
                             </button>
@@ -314,10 +331,54 @@ app.get('/', (c) => {
                 </div>
             </div>
             
+            <!-- Language Switch Modal -->
+            <div id="language-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="settings.language">Ngôn ngữ</h3>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="language-option p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-girlfriend-400 transition-colors" data-lang="vi">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-2xl">🇻🇳</span>
+                                    <div>
+                                        <div class="font-medium">Tiếng Việt</div>
+                                        <div class="text-sm text-gray-500">Vietnamese</div>
+                                    </div>
+                                </div>
+                                <div class="language-check hidden text-girlfriend-500">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="language-option p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-girlfriend-400 transition-colors" data-lang="en">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-2xl">🇺🇸</span>
+                                    <div>
+                                        <div class="font-medium">English</div>
+                                        <div class="text-sm text-gray-500">Tiếng Anh</div>
+                                    </div>
+                                </div>
+                                <div class="language-check hidden text-girlfriend-500">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-language" class="px-4 py-2 text-gray-600 hover:text-gray-800" data-i18n="common.cancel">Hủy</button>
+                        <button id="save-language" class="px-4 py-2 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600" data-i18n="common.save">Lưu</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Modal -->
             <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-lg p-6 w-full max-w-sm">
-                    <h3 class="text-lg font-semibold mb-4">Cài Đặt Giọng Nói</h3>
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="settings.title">Cài đặt</h3>
                     
                     <div class="space-y-4">
                         <div>
@@ -345,11 +406,20 @@ app.get('/', (c) => {
                                 <option value="shy_girlfriend">Nhút Nhát & Dịu Dàng</option>
                             </select>
                         </div>
+                        
+                        <!-- Evening Notifications Toggle -->
+                        <div>
+                            <label class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-700" data-i18n="settings.evening_reminders">Nhắc nhở buổi tối</span>
+                                <input type="checkbox" id="evening-notifications" class="toggle-switch" checked>
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1" data-i18n="settings.evening_reminder_desc">Nhận thông báo lúc 20:00-22:00 để trò chuyện với người yêu AI</p>
+                        </div>
                     </div>
                     
                     <div class="flex justify-end space-x-3 mt-6">
-                        <button id="cancel-settings" class="px-4 py-2 text-gray-600 hover:text-gray-800">Hủy</button>
-                        <button id="save-settings" class="px-4 py-2 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600">Lưu</button>
+                        <button id="cancel-settings" class="px-4 py-2 text-gray-600 hover:text-gray-800" data-i18n="common.cancel">Hủy</button>
+                        <button id="save-settings" class="px-4 py-2 bg-girlfriend-500 text-white rounded-md hover:bg-girlfriend-600" data-i18n="common.save">Lưu</button>
                     </div>
                 </div>
             </div>
@@ -504,7 +574,7 @@ app.get('/', (c) => {
         
         <!-- JavaScript Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/app.js"></script>
+        <script src="/static/enhanced-app.js"></script>
         <script src="/static/private-mode.js"></script>
     </body>
     </html>

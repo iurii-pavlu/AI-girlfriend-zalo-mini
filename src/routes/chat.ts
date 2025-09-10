@@ -43,6 +43,43 @@ chat.post('/', async (c) => {
       return c.json({ error: 'Tin nhắn quá dài (tối đa 1000 ký tự)' }, 400);
     }
 
+    // Check for referral commands before processing as regular chat
+    const lowerText = body.text.toLowerCase().trim();
+    const referralKeywords = ['invite', 'mời', 'giới thiệu', 'mã giới thiệu', 'referral', 'refer', 'thưởng', 'rewards', 'phần thưởng'];
+    
+    if (referralKeywords.some(keyword => lowerText.includes(keyword))) {
+      try {
+        // Handle as referral command
+        const referralResponse = await fetch(`${c.env.APP_BASE_URL}/api/referral/chatbot-command`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': userId
+          },
+          body: JSON.stringify({
+            command: lowerText,
+            userId: userId
+          })
+        });
+
+        if (referralResponse.ok) {
+          const referralData = await referralResponse.json();
+          if (referralData.success) {
+            logger.info('Referral command processed', { command: lowerText, userId });
+            return c.json({
+              reply: referralData.response.message,
+              sessionId: sessionId,
+              isReferralCommand: true,
+              actionButtons: referralData.response.actionButtons || []
+            });
+          }
+        }
+      } catch (referralError) {
+        // If referral processing fails, continue with normal chat
+        logger.warn('Referral command processing failed, continuing with normal chat', referralError);
+      }
+    }
+
     // Initialize services
     const subService = new SubscriptionService(c.env, userId);
     const openai = new OpenAIClient(c.env, sessionId);

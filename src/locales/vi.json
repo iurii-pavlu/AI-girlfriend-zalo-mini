@@ -1,0 +1,133 @@
+{
+  "app_name": "AI Girlfriend",
+  
+  "navigation": {
+    "chat": "Trò chuyện",
+    "settings": "Cài đặt",
+    "subscribe": "Nâng cấp",
+    "profile": "Hồ sơ"
+  },
+
+  "onboarding": {
+    "welcome_title": "Chào mừng đến với AI Girlfriend! 💕",
+    "welcome_message": "Em là người bạn gái AI của anh. Hãy để em tìm hiểu về anh nhé!",
+    "start_now": "Bắt đầu ngay",
+    "continue": "Tiếp tục",
+    "skip": "Bỏ qua",
+    
+    "questions": {
+      "name": "Anh tên gì nhỉ? Em muốn biết để gọi tên anh đó! 😊",
+      "age": "Anh bao nhiêu tuổi rồi? Em tò mò quá!",
+      "interests": "Anh thích làm gì trong thời gian rảnh? Kể cho em nghe đi!",
+      "personality": "Anh muốn em như thế nào? Dịu dàng, năng động hay bí ẩn?",
+      "chat_style": "Anh thích trò chuyện về gì? Tình cảm, cuộc sống hay những điều thú vị?"
+    },
+    
+    "personality_types": {
+      "gentle": "Dịu dàng & Che chở",
+      "energetic": "Năng động & Vui vẻ", 
+      "mysterious": "Bí ẩn & Quyến rũ",
+      "caring": "Quan tâm & Hiểu biết",
+      "playful": "Nghịch ngợm & Đáng yêu"
+    },
+
+    "chat_themes": {
+      "romantic": "Lãng mạn & Tình cảm",
+      "daily_life": "Cuộc sống hàng ngày",
+      "adventure": "Phiêu lưu & Khám phá",
+      "deep_talk": "Trò chuyện sâu sắc",
+      "fun_casual": "Vui vẻ & Thoải mái"
+    },
+
+    "completion": "Hoàn thành! Em đã hiểu về anh rồi đó! 💖 Bây giờ hãy bắt đầu cuộc trò chuyện đầu tiên nhé!"
+  },
+
+  "settings": {
+    "title": "Cài đặt",
+    "language": "Ngôn ngữ",
+    "evening_reminders": "Nhắc nhở buổi tối",
+    "notification_settings": "Cài đặt thông báo",
+    "subscription": "Gói đăng ký",
+    "privacy": "Riêng tư",
+    "about": "Thông tin",
+    
+    "language_options": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+
+    "evening_reminder_desc": "Nhận thông báo lúc 20:00-22:00 để trò chuyện với người yêu AI",
+    "notifications_enabled": "Bật thông báo",
+    "notifications_disabled": "Tắt thông báo"
+  },
+
+  "subscription": {
+    "title": "Nâng cấp tài khoản",
+    "current_plan": "Gói hiện tại",
+    "upgrade_now": "Nâng cấp ngay",
+    "benefits": "Quyền lợi Premium",
+    
+    "plans": {
+      "free": "Miễn phí",
+      "weekly": "Gói tuần",
+      "monthly": "Gói tháng"
+    },
+
+    "features": {
+      "unlimited_messages": "Tin nhắn không giới hạn",
+      "voice_messages": "Tin nhắn thoại",
+      "premium_personalities": "Tính cách Premium",
+      "priority_support": "Hỗ trợ ưu tiên",
+      "no_ads": "Không quảng cáo"
+    },
+
+    "prices": {
+      "weekly": "49,000đ/tuần",
+      "monthly": "149,000đ/tháng"
+    },
+
+    "subscribe_button": "Đăng ký {plan}",
+    "processing": "Đang xử lý...",
+    "success": "Đăng ký thành công!",
+    "error": "Có lỗi xảy ra. Vui lòng thử lại."
+  },
+
+  "notifications": {
+    "evening_reminder": "Dành 5-10 phút tối nay cho người yêu AI của bạn? Nhấn để trò chuyện 💬",
+    "payment_success": "Thanh toán thành công! Tài khoản Premium đã được kích hoạt.",
+    "payment_failed": "Thanh toán thất bại. Vui lòng thử lại hoặc liên hệ hỗ trợ.",
+    "subscription_expired": "Gói Premium đã hết hạn. Gia hạn ngay để tiếp tục sử dụng!"
+  },
+
+  "chat": {
+    "type_message": "Nhập tin nhắn...",
+    "send": "Gửi",
+    "voice_message": "Tin nhắn thoại",
+    "thinking": "Đang suy nghĩ...",
+    "error": "Có lỗi xảy ra. Vui lòng thử lại.",
+    "limit_reached": "Bạn đã đạt giới hạn tin nhắn. Nâng cấp để tiếp tục!",
+    "welcome_back": "Chào anh! Em nhớ anh quá! 💕"
+  },
+
+  "errors": {
+    "network_error": "Lỗi kết nối mạng",
+    "server_error": "Lỗi máy chủ", 
+    "validation_error": "Dữ liệu không hợp lệ",
+    "payment_error": "Lỗi thanh toán",
+    "subscription_error": "Lỗi đăng ký",
+    "try_again": "Thử lại",
+    "contact_support": "Liên hệ hỗ trợ"
+  },
+
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "loading": "Đang tải...",
+    "success": "Thành công!",
+    "error": "Lỗi!",
+    "yes": "Có",
+    "no": "Không"
+  }
+}

@@ -309,6 +309,23 @@ class AIGirlfriendApp {
       }
     });
 
+    // Action button event listeners (delegated)
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('action-btn')) {
+        const action = e.target.dataset.action;
+        const buttonData = e.target.dataset.buttonData;
+        
+        let parsedData = {};
+        try {
+          parsedData = buttonData ? JSON.parse(decodeURIComponent(buttonData)) : {};
+        } catch (error) {
+          console.warn('Failed to parse button data:', buttonData);
+        }
+        
+        this.handleActionButtonClick(action, parsedData);
+      }
+    });
+
     console.log('✅ Event listeners set up');
   }
 
@@ -379,6 +396,8 @@ class AIGirlfriendApp {
         role: 'assistant',
         content: data.reply,
         stickerUrl: data.stickerUrl,
+        actionButtons: data.actionButtons,
+        isReferralCommand: data.isReferralCommand,
         timestamp: new Date().toISOString()
       });
 
@@ -602,6 +621,7 @@ class AIGirlfriendApp {
             <div class="text-sm ${message.isVoice ? 'italic' : ''}">${message.content}</div>
             ${audioPlayer}
             ${stickerDisplay}
+            ${this.generateActionButtons(message.actionButtons)}
             <div class="text-xs ${isUser ? 'text-girlfriend-100' : 'text-gray-400'} mt-1">${time}</div>
           </div>
         </div>
@@ -918,6 +938,179 @@ class AIGirlfriendApp {
     }
   }
 
+  // Action Buttons for Referral Commands
+  generateActionButtons(buttons) {
+    if (!buttons || !Array.isArray(buttons) || buttons.length === 0) {
+      return '';
+    }
+
+    return `
+      <div class="mt-3 flex flex-wrap gap-2">
+        ${buttons.map(button => `
+          <button class="action-btn px-3 py-2 bg-girlfriend-200 hover:bg-girlfriend-300 text-girlfriend-800 rounded-lg text-sm font-medium transition-colors" 
+                  data-action="${button.action}" 
+                  data-button-data="${encodeURIComponent(JSON.stringify(button.data || {}))}">
+            ${button.text}
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // Handle action button clicks
+  handleActionButtonClick(actionType, buttonData) {
+    console.log('Action button clicked:', { actionType, buttonData });
+    
+    switch (actionType) {
+      case 'copy_referral_link':
+      case 'copy':
+        if (buttonData && typeof buttonData === 'string') {
+          this.copyToClipboard(buttonData);
+          this.showMessage('Đã sao chép liên kết giới thiệu! 📋');
+        } else {
+          this.generateAndCopyReferral();
+        }
+        break;
+        
+      case 'share_zalo':
+      case 'share':
+        this.shareReferralViaZalo(buttonData);
+        break;
+        
+      case 'generate_referral':
+      case 'invite_more':
+        this.generateReferralCommand();
+        break;
+        
+      case 'check_rewards':
+        this.checkRewardsCommand();
+        break;
+        
+      case 'activate_rewards':
+        this.activateRewards();
+        break;
+        
+      case 'detailed_stats':
+        this.getDetailedStats();
+        break;
+        
+      case 'start_chat':
+        this.showMessage('Bắt đầu trò chuyện với bạn gái AI! 💕');
+        document.getElementById('message-input').focus();
+        break;
+        
+      default:
+        console.warn('Unknown action type:', actionType);
+    }
+  }
+
+  // Referral Command Methods
+  async generateReferralCommand() {
+    try {
+      const response = await axios.post('/api/referral/generateReferral', {
+        userId: this.userId
+      }, {
+        headers: {
+          'X-User-Id': this.userId,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.success) {
+        const { data, chatbotResponse } = response.data;
+        
+        this.displayMessage({
+          role: 'assistant',
+          content: chatbotResponse.message,
+          actionButtons: chatbotResponse.buttons,
+          isReferralCommand: true,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Store referral data for sharing
+        this.currentReferralData = data;
+      }
+    } catch (error) {
+      console.error('Error generating referral:', error);
+      this.showError('Không thể tạo mã giới thiệu. Vui lòng thử lại.');
+    }
+  }
+
+  async checkRewardsCommand() {
+    try {
+      const response = await axios.get(`/api/referral/rewards/${this.userId}`, {
+        headers: {
+          'X-User-Id': this.userId
+        }
+      });
+
+      if (response.data.success) {
+        const { chatbotResponse } = response.data;
+        
+        this.displayMessage({
+          role: 'assistant',
+          content: chatbotResponse.message,
+          actionButtons: chatbotResponse.buttons,
+          isReferralCommand: true,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error checking rewards:', error);
+      this.showError('Không thể lấy thông tin phần thưởng. Vui lòng thử lại.');
+    }
+  }
+
+  async generateAndCopyReferral() {
+    try {
+      if (!this.currentReferralData) {
+        await this.generateReferralCommand();
+      }
+      
+      if (this.currentReferralData && this.currentReferralData.referralUrl) {
+        this.copyToClipboard(this.currentReferralData.referralUrl);
+        this.showMessage('Đã sao chép liên kết giới thiệu! 📋');
+      }
+    } catch (error) {
+      console.error('Error copying referral:', error);
+      this.showError('Không thể sao chép liên kết.');
+    }
+  }
+
+  shareReferralViaZalo(shareData) {
+    try {
+      const message = shareData && typeof shareData === 'string' ? 
+        shareData : 
+        this.currentReferralData ? 
+        this.currentReferralData.shareMessage : 
+        'Tham gia AI Girlfriend cùng em! 💕';
+      
+      // Try to share via Zalo Mini App API if available
+      if (window.ZaloMiniApp) {
+        window.ZaloMiniApp.shareMessage({
+          message: message
+        });
+        this.showMessage('Đã chia sẻ qua Zalo! 📤');
+      } else {
+        // Fallback - copy to clipboard
+        this.copyToClipboard(message);
+        this.showMessage('Đã sao chép tin nhắn chia sẻ! 📋');
+      }
+    } catch (error) {
+      console.error('Error sharing via Zalo:', error);
+      this.showError('Không thể chia sẻ. Đã sao chép vào clipboard.');
+    }
+  }
+
+  activateRewards() {
+    this.showMessage('Tính năng kích hoạt phần thưởng sẽ được cập nhật sớm! 🎁');
+  }
+
+  getDetailedStats() {
+    // This could open a detailed stats modal or send a command
+    this.sendTextMessage('thống kê chi tiết');
+  }
+
   // Sticker System Methods
   async toggleStickerPicker() {
     const stickerPicker = document.getElementById('sticker-picker');
@@ -1031,6 +1224,8 @@ class AIGirlfriendApp {
         role: 'assistant',
         content: data.reply,
         stickerUrl: data.stickerUrl,
+        actionButtons: data.actionButtons,
+        isReferralCommand: data.isReferralCommand,
         timestamp: new Date().toISOString()
       });
 
