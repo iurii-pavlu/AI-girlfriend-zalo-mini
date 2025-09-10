@@ -15,7 +15,7 @@
 ## 🚀 Live Demo
 
 - **Development**: https://3000-i7642hoopwei37i4bg3sp-6532622b.e2b.dev
-- **Production**: https://39d570bd.project-a1669842.pages.dev ✅ FIXED - Message input working
+- **Production**: https://6a0b255f.project-a1669842.pages.dev ✅ FIXED - Loading issue resolved, Voice integration active
 - **GitHub**: https://github.com/iurii-pavlu/AI-girlfriend-zalo-mini
 - **Project Backup**: [Complete project with Memory Plus](https://page.gensparksite.com/project_backups/tooluse_o22s1gEjTG6XVJeQDkWz6A.tar.gz)
 
