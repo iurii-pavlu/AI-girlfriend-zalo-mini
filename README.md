@@ -6,7 +6,8 @@
 
 **AI Girlfriend** is a fully functional Zalo Mini App that provides users with a caring, supportive AI companion featuring:
 - **Text & Voice Chat**: Telegram-style chat interface with voice messaging capabilities
-- **Real-time STT/TTS**: Speech-to-text and text-to-speech powered by Google Cloud
+- **Real-time Voice Calls**: ElevenLabs integration for two-way voice conversations with AI girlfriend
+- **Advanced STT/TTS**: Multi-provider speech technology (Google Cloud + ElevenLabs)
 - **AI Conversations**: ChatGPT-4o-mini for cost-effective, engaging dialogue
 - **Vietnamese Market**: Optimized for Zalo's primary user base with PG-13 content filtering
 - **Edge Performance**: Cloudflare Workers deployment for <100ms global latency
@@ -46,6 +47,18 @@
 - [x] **Auto-Clear History** - Configurable data clearing (30min default) and incognito mode
 - [x] **Stealth Language Mode** - Professional Vietnamese conversion ('yêu' → 'thích làm việc')
 - [x] **Privacy Audit Trail** - Complete logging of security events with risk assessment
+
+### 🎙️ **ElevenLabs Voice Integration (NEW - v1.1)**
+- [x] **Real-time Voice Calls** - Two-way voice conversations with AI girlfriend using ElevenLabs Realtime API
+- [x] **WebRTC + WebSocket Fallback** - Mobile WebView optimized with automatic connection fallback
+- [x] **Voice Activity Detection** - Smart 2-second silence detection for natural conversation flow
+- [x] **Floating Call Controls** - Beautiful call pill with duration, quality indicator, and end call button
+- [x] **Waveform Visualization** - Real-time audio level display for user and AI girlfriend
+- [x] **Transcript Saving** - Automatic "Evening Debrief" moments generation with LLM summaries
+- [x] **Security & Rate Limiting** - HMAC webhook verification, origin validation, short-lived tokens (60-120s TTL)
+- [x] **Mobile Optimized** - getUserMedia + AudioWorklet processing for low-latency audio in WebView
+- [x] **Settings Integration** - Toggle transcript saving and waveform display in existing settings modal
+- [x] **Pink Theme Integration** - Seamlessly integrated with girlfriend color scheme (pink gradients)
 
 ### 💰 **Monetization & Viral Growth**
 - [x] **Freemium Model** - 10 free messages, then paywall or referrals
@@ -100,11 +113,11 @@
 - **Runtime**: Cloudflare Workers (V8 isolates, global edge)
 - **Database**: Cloudflare D1 (distributed SQLite)
 - **Storage**: Cloudflare R2 (S3-compatible object storage)
-- **APIs**: OpenAI GPT-4o-mini, Google Cloud STT/TTS
+- **APIs**: OpenAI GPT-4o-mini, Google Cloud STT/TTS, ElevenLabs Realtime Voice
 
 ### **Frontend (Mobile-First)**
 - **UI**: Vanilla JavaScript + TailwindCSS
-- **Audio**: WebRTC MediaRecorder API
+- **Audio**: WebRTC MediaRecorder API + AudioWorklet, ElevenLabs Voice Integration
 - **HTTP**: Axios for API communication  
 - **Optimization**: Mobile webview optimized, <300KB bundle
 
@@ -122,7 +135,15 @@ POST /api/chat          # Memory-enhanced text chat with relationship context
 POST /api/message       # Complete pipeline (text or voice → memory-enhanced response)
 POST /api/stt          # Speech-to-text only
 POST /api/tts          # Text-to-speech only
-GET  /audio/{filename} # Serve audio files
+GET  /audio/{filename}  # Serve audio files
+```
+
+### **Voice Call Endpoints (ElevenLabs Integration)**
+```
+POST /api/token/elevenlabs    # Get secure WebSocket token for voice calls (60-120s TTL)
+WS   /api/proxy/elevenlabs   # WebSocket proxy for mobile WebView compatibility
+POST /api/webhooks/elevenlabs # HMAC-verified webhooks (transcription.completed, voice.removal.notice)
+POST /api/moments/save        # Save voice call transcripts as "Evening Debrief" moments
 ```
 
 ### **Subscription & Monetization**

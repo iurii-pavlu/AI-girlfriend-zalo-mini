@@ -574,6 +574,11 @@ app.get('/', (c) => {
         
         <!-- JavaScript Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        
+        <!-- Voice Integration -->
+        <script src="/static/voice-integration.js"></script>
+        
+        <!-- Main App Scripts -->
         <script src="/static/enhanced-app.js"></script>
         <script src="/static/private-mode.js"></script>
     </body>

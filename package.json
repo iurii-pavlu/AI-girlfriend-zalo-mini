@@ -20,13 +20,16 @@
     "git:commit": "git add . && git commit -m"
   },
   "dependencies": {
-    "hono": "^4.9.6"
+    "hono": "^4.9.6",
+    "zod": "^3.22.4",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250906.0",
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-cloudflare-pages": "^0.4.2",
     "@hono/vite-dev-server": "^0.18.2",
+    "@types/uuid": "^9.0.7",
     "typescript": "^5.9.2",
     "vite": "^6.3.5",
     "wrangler": "^4.4.0"
