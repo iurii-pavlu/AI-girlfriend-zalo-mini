@@ -484,7 +484,7 @@ app.get('/', (c) => {
                                     <p class="text-sm text-gray-600">Tiết kiệm 69% • Không giới hạn</p>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xl font-bold text-girlfriend-600">149.000 VNĐ</div>
+                                    <div class="text-xl font-bold text-girlfriend-600">169.000 VNĐ</div>
                                     <div class="text-sm text-gray-500 line-through">480.000 VNĐ</div>
                                 </div>
                             </div>

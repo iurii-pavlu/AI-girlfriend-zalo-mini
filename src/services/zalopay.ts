@@ -78,7 +78,7 @@ class ZaloPayService {
       },
       monthly: {
         type: 'monthly', 
-        amount: 149000, // 149,000 VND
+        amount: 169000, // 169,000 VND
         duration_days: 30,
         name: 'Gói tháng',
         description: '30 ngày Premium với tính năng không giới hạn'
