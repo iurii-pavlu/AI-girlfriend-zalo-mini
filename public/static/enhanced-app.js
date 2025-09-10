@@ -615,11 +615,24 @@ class EnhancedAIGirlfriendApp {
       // Handle referral code
       this.handleReferralCode();
       
-      // Initialize session if onboarding completed
+      // Initialize session and show main app
+      let shouldShowApp = false;
+      
       if (this.onboardingProgress?.onboarding_completed) {
-        await this.initializeSession();
-        await this.loadChatHistory();
-        
+        try {
+          await this.initializeSession();
+          await this.loadChatHistory();
+          shouldShowApp = true;
+        } catch (error) {
+          console.error('Session initialization failed, but showing app anyway:', error);
+          shouldShowApp = true;
+        }
+      } else {
+        // Show app even if onboarding is not completed
+        shouldShowApp = true;
+      }
+      
+      if (shouldShowApp) {
         // Show main app
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
@@ -631,6 +644,18 @@ class EnhancedAIGirlfriendApp {
       console.error('❌ Error during app initialization:', error);
       this.showMessage('❌ ' + this.t('errors.initialization_failed'), 'error');
     }
+    
+    // Fallback: Always show main app after 3 seconds if still loading
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      const mainApp = document.getElementById('main-app');
+      
+      if (loading && mainApp && !loading.classList.contains('hidden')) {
+        console.log('🔧 Fallback: Showing main app after initialization timeout');
+        loading.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+      }
+    }, 3000);
   }
 
   setupEventListeners() {
@@ -872,3 +897,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export for global access
 window.EnhancedAIGirlfriendApp = EnhancedAIGirlfriendApp;
+// Compatibility alias for old references
+window.AIGirlfriendApp = EnhancedAIGirlfriendApp;
