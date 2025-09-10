@@ -595,7 +595,7 @@ class EnhancedAIGirlfriendApp {
 
   // Main App Initialization
   async init() {
-    console.log('🚀 Initializing Enhanced AI Girlfriend App...');
+    console.log('🚀 Initializing Enhanced AI Girlfriend App v1.1...');
     
     try {
       // Initialize core systems
